@@ -1,18 +1,20 @@
 package com.example.vpn
 
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
-import androidx.compose.material.icons.filled.Check
+import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
-import androidx.compose.runtime.Composable
+import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
@@ -22,57 +24,15 @@ fun AccountScreen() {
     Column(
         modifier = Modifier
             .fillMaxSize()
-            .padding(horizontal = 24.dp, vertical = 24.dp),
+            .background(Color(0xFF0A0F1C))
+            .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Your Account", style = MaterialTheme.typography.titleLarge.copy(fontSize = 26.sp), color = Color.White)
+        Text("Premium Features", style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp), color = Color.White)
         Spacer(modifier = Modifier.height(24.dp))
 
-        Box(
-            modifier = Modifier
-                .fillMaxWidth()
-                .clip(RoundedCornerShape(16.dp))
-                .background(Color(0xFF11182A))
-                .padding(20.dp)
-        ) {
-            Column {
-                Text("Current Plan: Basic", color = Color.White, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                Spacer(modifier = Modifier.height(8.dp))
-                Text(
-                    "You’re connected to a Basic Plan. Upgrade for faster speeds and full server access.",
-                    color = Color.Gray,
-                    fontSize = 13.sp
-                )
-            }
-        }
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Text("Choose your plan", color = Color.White, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp))
-        Spacer(modifier = Modifier.height(16.dp))
-
-        PlanOption("1 Month", "$3.99", null, null)
-        Spacer(modifier = Modifier.height(12.dp))
-        PlanOption("3 Months", "$9.99", "Save 17%", "You save $1.33/month")
-        Spacer(modifier = Modifier.height(12.dp))
-        PlanOption("12 Months", "$29.99", "Save 38%", "You save $2.33/month")
-
-        Spacer(modifier = Modifier.height(28.dp))
-
-        Button(
-            onClick = { /* Handle upgrade */ },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(52.dp)
-                .clip(RoundedCornerShape(12.dp))
-        ) {
-            Text("Upgrade Plan", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-        }
-
-        Spacer(modifier = Modifier.height(36.dp))
-
-        Text("Compare Plans", color = Color.White, style = MaterialTheme.typography.titleMedium.copy(fontSize = 18.sp))
+        // Comparison Section
+        Text("What’s included", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Spacer(modifier = Modifier.height(16.dp))
 
         ComparisonRow("Germany / Netherlands", true, true)
@@ -83,22 +43,50 @@ fun AccountScreen() {
 
         Spacer(modifier = Modifier.height(36.dp))
 
+        // Plan Grid
+        Text("Choose your plan", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
+        Spacer(modifier = Modifier.height(16.dp))
+
+        Column {
+            PlanOption("1 Month", "$3.99", null, null, selected = true)
+            Spacer(modifier = Modifier.height(12.dp))
+            PlanOption("12 Months", "$29.99", "Save 38%", "You save \$2.33/mo", selected = false)
+        }
+
+        Spacer(modifier = Modifier.height(36.dp))
+
+        Button(
+            onClick = { },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
+            modifier = Modifier
+                .fillMaxWidth()
+                .height(54.dp)
+                .clip(RoundedCornerShape(16.dp))
+        ) {
+            Text("Go Premium 🚀", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+        }
+
+        Spacer(modifier = Modifier.height(36.dp))
+
         Text("App version: 1.0.0", fontSize = 12.sp, color = Color.Gray)
     }
 }
 
 @Composable
-fun PlanOption(duration: String, price: String, tag: String?, savings: String?) {
+fun PlanOption(duration: String, price: String, tag: String?, savings: String?, selected: Boolean) {
+    val border = if (selected) Modifier.border(2.dp, Color(0xFF00FFC8), RoundedCornerShape(18.dp)) else Modifier
+
     Column(
         modifier = Modifier
             .fillMaxWidth()
+            .then(border)
             .clip(RoundedCornerShape(18.dp))
             .background(
                 brush = Brush.horizontalGradient(
                     colors = listOf(Color(0xFF00FFC8), Color(0xFF0078A0))
                 )
             )
-            .clickable { /* Handle selection */ }
+            .clickable { }
             .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
         Row(

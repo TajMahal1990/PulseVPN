@@ -1,5 +1,8 @@
 package com.example.vpn
 
+
+
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
@@ -10,8 +13,10 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
 import androidx.compose.ui.Alignment
+import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
-
+import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.ui.graphics.vector.ImageVector
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -27,35 +32,52 @@ fun VPNAppWithDrawer() {
                 drawerContainerColor = Color(0xFF1A1F2E),
                 modifier = Modifier.width(280.dp)
             ) {
-                Spacer(modifier = Modifier.height(16.dp))
-                Text("Навигация", color = Color.White, modifier = Modifier.padding(16.dp))
-                NavigationDrawerItem(
-                    label = { Text("VPN", color = Color.White) },
-                    selected = selectedTab == 0,
-                    onClick = {
-                        selectedTab = 0
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = { Icon(Icons.Default.Lock, contentDescription = null, tint = Color.White) }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Аккаунт", color = Color.White) },
-                    selected = selectedTab == 1,
-                    onClick = {
-                        selectedTab = 1
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = { Icon(Icons.Default.Person, contentDescription = null, tint = Color.White) }
-                )
-                NavigationDrawerItem(
-                    label = { Text("Настройки", color = Color.White) },
-                    selected = selectedTab == 2,
-                    onClick = {
-                        selectedTab = 2
-                        scope.launch { drawerState.close() }
-                    },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null, tint = Color.White) }
-                )
+                Column(modifier = Modifier.fillMaxSize()) {
+                    Spacer(modifier = Modifier.height(32.dp))
+
+                    Text(
+                        text = "PULSE VPN",
+                        color = Color.White,
+                        fontWeight = FontWeight.Bold,
+                        style = MaterialTheme.typography.headlineSmall,
+                        modifier = Modifier.padding(horizontal = 16.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+                    Divider(color = Color(0xFF444A65), thickness = 1.dp)
+                    Spacer(modifier = Modifier.height(12.dp))
+
+                    DrawerItem(
+                        label = "VPN",
+                        icon = Icons.Default.Lock,
+                        selected = selectedTab == 0,
+                        onClick = {
+                            selectedTab = 0
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+                    DrawerItem(
+                        label = "Premium-функция",
+                        icon = Icons.Default.Star,
+                        selected = selectedTab == 1,
+                        onClick = {
+                            selectedTab = 1
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+                    DrawerItem(
+                        label = "Настройки",
+                        icon = Icons.Default.Settings,
+                        selected = selectedTab == 2,
+                        onClick = {
+                            selectedTab = 2
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+
+                    Spacer(modifier = Modifier.weight(1f))
+                    Text("v1.0.0", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                }
             }
         }
     ) {
@@ -63,7 +85,10 @@ fun VPNAppWithDrawer() {
             topBar = {
                 TopAppBar(
                     title = {
-                        Box(modifier = Modifier.fillMaxWidth(), contentAlignment = Alignment.Center) {
+                        Box(
+                            modifier = Modifier.fillMaxWidth(),
+                            contentAlignment = Alignment.Center
+                        ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
                                 Text("PULSE", color = Color.White, fontWeight = FontWeight.Bold)
                                 Text("VPN", color = Color(0xFF00FFC8), fontWeight = FontWeight.Bold)
@@ -80,14 +105,15 @@ fun VPNAppWithDrawer() {
                         }
                     },
                     actions = {
-                        Spacer(modifier = Modifier.width(48.dp)) // пустота вместо кнопки справа
+                        Spacer(modifier = Modifier.width(48.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
-                        containerColor = Color(0xFF0A0F1C)
+                        containerColor = Color(0xFF0A0F1C),
+                        titleContentColor = Color.White,
+                        navigationIconContentColor = Color.White,
+                        actionIconContentColor = Color.White
                     )
                 )
-
-
             },
             containerColor = Color(0xFF0A0F1C)
         ) { innerPadding ->
@@ -107,9 +133,39 @@ fun VPNAppWithDrawer() {
     }
 }
 
-
+@Composable
+fun DrawerItem(
+    label: String,
+    icon: ImageVector,
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    NavigationDrawerItem(
+        label = {
+            Text(
+                text = label,
+                color = if (selected) Color(0xFF00FFC8) else Color.White,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+            )
+        },
+        selected = selected,
+        onClick = onClick,
+        icon = {
+            Icon(
+                imageVector = icon,
+                contentDescription = null,
+                tint = if (selected) Color(0xFF00FFC8) else Color.White
+            )
+        },
+        modifier = Modifier
+            .padding(horizontal = 12.dp, vertical = 6.dp)
+            .clip(RoundedCornerShape(8.dp))
+    )
+}
 
 @Composable
 fun SettingsScreen() {
-    Text("Настройки", color = Color.White)
+    Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
+        Text("Настройки", color = Color.White)
+    }
 }
