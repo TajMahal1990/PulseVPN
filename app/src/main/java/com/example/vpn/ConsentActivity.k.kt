@@ -20,7 +20,9 @@ import androidx.activity.compose.setContent
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.foundation.text.ClickableText
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -28,8 +30,12 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.SpanStyle
+import androidx.compose.ui.text.TextStyle
+import androidx.compose.ui.text.buildAnnotatedString
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
+import androidx.compose.ui.text.withStyle
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
@@ -75,162 +81,173 @@ fun ConsentScreen(onAgree: () -> Unit) {
             .fillMaxSize()
             .background(Color(0xFF0A0F1C))
     ) {
-        Column(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(horizontal = 24.dp),
-            verticalArrangement = Arrangement.SpaceBetween
-        ) {
-
-            // 🔙 Кнопка "Назад"
-            Box(
+        Box(modifier = Modifier.fillMaxSize()) {
+            LazyColumn(
                 modifier = Modifier
-                    .fillMaxWidth()
-                    .padding(top = 16.dp)
-                    .clickable {
-                        showDialog = true
-                    },
-                contentAlignment = Alignment.TopStart
-            ) {
-                Icon(
-                    imageVector = Icons.Default.ArrowBack,
-                    contentDescription = "Назад",
-                    tint = Color.White,
-                    modifier = Modifier.size(28.dp)
-                )
-            }
-
-            Column(
-                modifier = Modifier.fillMaxWidth(),
+                    .fillMaxSize()
+                    .padding(horizontal = 24.dp),
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
-
-                Spacer(modifier = Modifier.height(5.dp))
-
-                // 🔷 Логотип
-                Image(
-                    painter = painterResource(id = R.drawable.logo2__1_),
-                    contentDescription = null,
-                    modifier = Modifier.size(110.dp)
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 🟢 Заголовок
-                Text(
-                    text = "Добро пожаловать в PulseVPN",
-                    color = Color.White,
-                    fontSize = 22.sp,
-                    fontWeight = FontWeight.Bold
-                )
-
-                Spacer(modifier = Modifier.height(24.dp))
-
-                // 📘 Блок как в Rapid
-                Column(horizontalAlignment = Alignment.CenterHorizontally) {
-                    Row {
-                        Text(
-                            text = "Прочтите нашу ",
-                            color = Color(0xFFB0BEC5),
-                            fontSize = 15.sp
+                item {
+                    // 🔙 Назад
+                    Spacer(modifier = Modifier.height(48.dp))
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .clickable { showDialog = true },
+                        contentAlignment = Alignment.TopStart
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.ArrowBack,
+                            contentDescription = "Назад",
+                            tint = Color.White,
+                            modifier = Modifier.size(28.dp)
                         )
-                        Text(
-                            text = "Политику конфиденциальности.",
-                            color = Color(0xFF00FFC8),
+                    }
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 🔷 Лого
+                    Image(
+                        painter = painterResource(id = R.drawable.vpnlogo__1_),
+                        contentDescription = null,
+                        modifier = Modifier.size(100.dp)
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 🟢 Заголовок
+                    Text(
+                        text = "Добро пожаловать в PulseVPN",
+                        color = Color.White,
+                        fontSize = 20.sp,
+                        fontWeight = FontWeight.Bold,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
+                    )
+
+                    Spacer(modifier = Modifier.height(24.dp))
+
+                    // 📘 Строка 1: Политика (annotated)
+                    val policyText = buildAnnotatedString {
+                        append("Прочтите нашу ")
+                        pushStringAnnotation("tag", "policy")
+                        withStyle(SpanStyle(color = Color(0xFF00FFC8))) {
+                            append("Политику конфиденциальности.")
+                        }
+                        pop()
+                    }
+                    ClickableText(
+                        text = policyText,
+                        style = TextStyle(
+                            color = Color(0xFFB0BEC5),
                             fontSize = 15.sp,
-                            modifier = Modifier.clickable {
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { offset ->
+                            policyText.getStringAnnotations("tag", offset, offset).firstOrNull()?.let {
                                 context.startActivity(
                                     Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/privacy-policy"))
                                 )
                             }
-                        )
-                    }
+                        }
+                    )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
+                    // Строка 2, 3, 4
                     Text(
                         text = "Нажмите Согласиться и продолжить, чтобы",
                         color = Color(0xFFB0BEC5),
                         fontSize = 15.sp,
-                        textAlign = TextAlign.Center
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
-
                     Text(
                         text = "принять",
                         color = Color(0xFFB0BEC5),
-                        fontSize = 15.sp
+                        fontSize = 15.sp,
+                        textAlign = TextAlign.Center,
+                        modifier = Modifier.fillMaxWidth()
                     )
 
-                    Text(
-                        text = "Условия использования.",
-                        color = Color(0xFF00FFC8),
-                        fontSize = 15.sp,
-                        modifier = Modifier.clickable {
-                            context.startActivity(
-                                Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/terms-of-use"))
-                            )
+                    val termsText = buildAnnotatedString {
+                        pushStringAnnotation("tag", "terms")
+                        withStyle(SpanStyle(color = Color(0xFF00FFC8))) {
+                            append("Условия использования.")
+                        }
+                        pop()
+                    }
+                    ClickableText(
+                        text = termsText,
+                        style = TextStyle(
+                            fontSize = 15.sp,
+                            textAlign = TextAlign.Center
+                        ),
+                        modifier = Modifier.fillMaxWidth(),
+                        onClick = { offset ->
+                            termsText.getStringAnnotations("tag", offset, offset).firstOrNull()?.let {
+                                context.startActivity(
+                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/terms-of-use"))
+                                )
+                            }
                         }
                     )
-                }
 
-                Spacer(modifier = Modifier.height(24.dp))
+                    Spacer(modifier = Modifier.height(24.dp))
 
-                // 🔻 Описание
-                Column(horizontalAlignment = Alignment.Start) {
+                    // 📄 Описание
                     Text(
                         text = "Принимая Условия использования и используя наш продукт, определённый набор данных устройства пользователей, включая информацию о приложениях, установленных пользователем, автоматически отправляется на серверы PulseVPN.",
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Text(
                         text = "Мы можем передавать некоторую контактную информацию, такую как список контактов, третьей стороне в маркетинговых и рекламных целях.",
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
                     )
-
                     Spacer(modifier = Modifier.height(8.dp))
-
                     Text(
                         text = "Все собираемые нами данные анонимны и не содержат никакой личной идентифицирующей информации.",
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
                     )
+                    Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                Spacer(modifier = Modifier.height(32.dp))
-            }
-
-            // ✅ Кнопка
-            Box(
-                modifier = Modifier
-                    .height(50.dp)
-                    .fillMaxWidth()
-                    .clip(RoundedCornerShape(16.dp))
-                    .background(
-                        brush = Brush.horizontalGradient(
-                            colors = listOf(Color(0xFF00FFC8), Color(0xFF0078A0))
+                // 🟦 Кнопка
+                item {
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .height(50.dp)
+                            .clip(RoundedCornerShape(16.dp))
+                            .background(
+                                Brush.horizontalGradient(
+                                    colors = listOf(Color(0xFF00FFC8), Color(0xFF0078A0))
+                                )
+                            )
+                            .clickable { onAgree() },
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Text(
+                            text = "Согласиться & Продолжить",
+                            color = Color.Black,
+                            fontSize = 16.sp,
+                            fontWeight = FontWeight.Bold
                         )
-                    )
-                    .clickable { onAgree() },
-                contentAlignment = Alignment.Center
-            ) {
-                Text(
-                    text = "Согласиться & Продолжить",
-                    color = Color.Black,
-                    fontSize = 16.sp,
-                    fontWeight = FontWeight.Bold
-                )
+                    }
+                    Spacer(modifier = Modifier.height(32.dp))
+                }
             }
 
-            Spacer(modifier = Modifier.height(32.dp))
-
-            // 💬 Диалог подтверждения выхода
+            // 💬 Диалог выхода
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },

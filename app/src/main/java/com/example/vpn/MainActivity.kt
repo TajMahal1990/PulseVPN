@@ -32,63 +32,19 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 
 import android.app.Activity
+import androidx.compose.material.icons.filled.Menu
+import androidx.compose.material.icons.filled.MoreVert
 import androidx.compose.ui.platform.LocalContext
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            VPNApp()
+            VPNAppWithDrawer()
         }
     }
 }
 
-@Composable
-fun VPNApp() {
-    var selectedTab by remember { mutableStateOf(0) }
-    val tabs = listOf("VPN", "Account", "Settings")
-
-    Scaffold(
-        bottomBar = {
-            NavigationBar(containerColor = Color(0xFF0A0F1C)) {
-                NavigationBarItem(
-                    selected = selectedTab == 0,
-                    onClick = { selectedTab = 0 },
-                    icon = { Icon(Icons.Default.AccountBox, contentDescription = null) },
-                    label = { Text("VPN") }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 1,
-                    onClick = { selectedTab = 1 },
-                    icon = { Icon(Icons.Default.Person, contentDescription = null) },
-                    label = { Text("Account") }
-                )
-                NavigationBarItem(
-                    selected = selectedTab == 2,
-                    onClick = { selectedTab = 2 },
-                    icon = { Icon(Icons.Default.Settings, contentDescription = null) },
-                    label = { Text("Settings") }
-                )
-            }
-        },
-        containerColor = Color(0xFF0A0F1C)
-    ) { innerPadding ->
-        Box(
-            modifier = Modifier
-                .fillMaxSize()
-                .padding(innerPadding),
-            contentAlignment = Alignment.Center
-        ) {
-            if (selectedTab == 0) {
-                VPNCard()
-            } else if (selectedTab == 1) {
-                AccountScreen()
-            } else {
-                // SettingsScreen()
-            }
-        }
-    }
-}
 
 @Composable
 fun VPNCard() {
@@ -112,13 +68,13 @@ fun VPNCard() {
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
-        Spacer(modifier = Modifier.height(32.dp))
-        Text("VPN LOGO", style = MaterialTheme.typography.headlineLarge, color = Color.White)
-        Spacer(modifier = Modifier.height(32.dp))
+        //Spacer(modifier = Modifier.height(32.dp))
+     //  Text("VPN LOGO", style = MaterialTheme.typography.headlineLarge, color = Color.White)
+       // Spacer(modifier = Modifier.height(32.dp))
 
-        Text("You are protected", style = MaterialTheme.typography.titleLarge, color = Color.White)
-        Spacer(modifier = Modifier.height(8.dp))
-        Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF00FFC8), modifier = Modifier.size(20.dp))
+       // Text("You are protected", style = MaterialTheme.typography.titleLarge, color = Color.White)
+       // Spacer(modifier = Modifier.height(8.dp))
+       // Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF00FFC8), modifier = Modifier.size(20.dp))
         Spacer(modifier = Modifier.height(24.dp))
         AnimatedConnectionCircle()
         Spacer(modifier = Modifier.height(24.dp))
