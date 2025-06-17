@@ -2,6 +2,7 @@ package com.example.vpn
 
 
 
+
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.*
 import androidx.compose.material.icons.Icons
@@ -74,6 +75,33 @@ fun VPNAppWithDrawer() {
                             scope.launch { drawerState.close() }
                         }
                     )
+                    DrawerItem(
+                        label = "Отзывы и поддержка",
+                        icon = Icons.Default.Chat,
+                        selected = selectedTab == 3,
+                        onClick = {
+                            selectedTab = 3
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+                    DrawerItem(
+                        label = "Оцените приложение",
+                        icon = Icons.Default.ThumbUp,
+                        selected = selectedTab == 4,
+                        onClick = {
+                            selectedTab = 4
+                            scope.launch { drawerState.close() }
+                        }
+                    )
+                    DrawerItem(
+                        label = "Фильтр",
+                        icon = Icons.Default.Tune,
+                        selected = selectedTab == 5,
+                        onClick = {
+                            selectedTab = 5
+                            scope.launch { drawerState.close() }
+                        }
+                    )
 
                     Spacer(modifier = Modifier.weight(1f))
                     Text("v1.0.0", color = Color.Gray, modifier = Modifier.padding(16.dp))
@@ -96,12 +124,22 @@ fun VPNAppWithDrawer() {
                         }
                     },
                     navigationIcon = {
-                        IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                            Icon(
-                                imageVector = Icons.Default.Menu,
-                                contentDescription = "Меню",
-                                tint = Color.White
-                            )
+                        if (selectedTab == 0) {
+                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
+                                Icon(
+                                    imageVector = Icons.Default.Menu,
+                                    contentDescription = "Меню",
+                                    tint = Color.White
+                                )
+                            }
+                        } else {
+                            IconButton(onClick = { selectedTab = 0 }) {
+                                Icon(
+                                    imageVector = Icons.Default.ArrowBack,
+                                    contentDescription = "Назад",
+                                    tint = Color.White
+                                )
+                            }
                         }
                     },
                     actions = {
@@ -114,7 +152,8 @@ fun VPNAppWithDrawer() {
                         actionIconContentColor = Color.White
                     )
                 )
-            },
+            }
+            ,
             containerColor = Color(0xFF0A0F1C)
         ) { innerPadding ->
             Box(
@@ -127,6 +166,9 @@ fun VPNAppWithDrawer() {
                     0 -> VPNCard()
                     1 -> AccountScreen()
                     2 -> SettingsScreen()
+                    3 -> SupportScreen()
+                    4 -> RateAppScreen()
+                    5 -> FilterScreen()
                 }
             }
         }
