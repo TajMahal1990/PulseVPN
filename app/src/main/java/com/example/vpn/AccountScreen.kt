@@ -33,14 +33,29 @@ fun AccountScreen() {
 
         // Comparison Section
         Text("What’s included", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(modifier = Modifier.height(8.dp))
 
-        ComparisonRow("Germany / Netherlands", true, true)
-        ComparisonRow("All countries", false, true)
-        ComparisonRow("Faster connection", false, true)
-        ComparisonRow("Priority support", false, true)
-        ComparisonRow("No ads", false, true)
+        Row(
+            modifier = Modifier
+                .fillMaxWidth()
+                .padding(horizontal = 16.dp),
+            horizontalArrangement = Arrangement.SpaceBetween
+        ) {
+            Spacer(modifier = Modifier.width(100.dp))
+            Text("Basic", color = Color.Gray, fontSize = 14.sp)
+            Text("Premium", color = Color(0xFF00FFC8), fontSize = 14.sp)
+        }
 
+        Spacer(modifier = Modifier.height(8.dp))
+
+        ComparisonRow("\uD83C\uDF0D Germany / Netherlands", true, true)
+        ComparisonRow("\uD83C\uDF0D All countries", false, true)
+        ComparisonRow("⚡ Faster connection", false, true)
+        ComparisonRow("\uD83D\uDD1A Priority support", false, true)
+        ComparisonRow("\uD83D\uDEAB No ads", false, true)
+
+        Spacer(modifier = Modifier.height(36.dp))
+        Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 1.dp)
         Spacer(modifier = Modifier.height(36.dp))
 
         // Plan Grid
@@ -48,9 +63,9 @@ fun AccountScreen() {
         Spacer(modifier = Modifier.height(16.dp))
 
         Column {
-            PlanOption("1 Month", "$3.99", null, null, selected = true)
+            PlanOption("1 Month", "$3.99 / month", "3 дня бесплатно, далее $3.99 в месяц", null, selected = true)
             Spacer(modifier = Modifier.height(12.dp))
-            PlanOption("12 Months", "$29.99", "Save 38%", "You save \$2.33/mo", selected = false)
+            PlanOption("12 Months", "$29.99 / year", "3 дня бесплатно, далее $29.99 в год", "Save 38% • You save $2.33/mo", selected = false)
         }
 
         Spacer(modifier = Modifier.height(36.dp))
@@ -63,7 +78,7 @@ fun AccountScreen() {
                 .height(54.dp)
                 .clip(RoundedCornerShape(16.dp))
         ) {
-            Text("Go Premium 🚀", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Text("Go Premium \uD83D\uDE80", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 17.sp)
         }
 
         Spacer(modifier = Modifier.height(36.dp))
@@ -106,10 +121,10 @@ fun PlanOption(duration: String, price: String, tag: String?, savings: String?, 
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White.copy(alpha = 0.2f))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
+                        .background(Color.White.copy(alpha = 0.3f))
+                        .padding(horizontal = 12.dp, vertical = 6.dp)
                 ) {
-                    Text(tag, fontSize = 11.sp, color = Color.White, fontWeight = FontWeight.Medium)
+                    Text(tag, fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.Bold)
                 }
             }
         }
