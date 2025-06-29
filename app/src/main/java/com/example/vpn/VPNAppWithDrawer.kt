@@ -18,6 +18,7 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.ui.graphics.vector.ImageVector
+import com.example.vpn.mainActivity.VPNCard
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
