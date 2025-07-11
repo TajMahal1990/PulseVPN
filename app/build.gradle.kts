@@ -28,11 +28,12 @@ android {
         }
     }
     compileOptions {
-        sourceCompatibility = JavaVersion.VERSION_11
-        targetCompatibility = JavaVersion.VERSION_11
+        sourceCompatibility = JavaVersion.VERSION_17
+        targetCompatibility = JavaVersion.VERSION_17
+        isCoreLibraryDesugaringEnabled = true
     }
     kotlinOptions {
-        jvmTarget = "11"
+        jvmTarget = "17"
     }
     buildFeatures {
         compose = true
@@ -60,6 +61,11 @@ dependencies {
 
     implementation("com.airbnb.android:lottie-compose:6.0.0")
     implementation ("androidx.compose.material:material-icons-extended:1.6.1")
+
+    implementation("com.wireguard.android:tunnel:1.0.20230706")
+
+    coreLibraryDesugaring("com.android.tools:desugar_jdk_libs:2.0.3")
+
 
 
 }
