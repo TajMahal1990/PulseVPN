@@ -1,21 +1,11 @@
 package com.example.vpn.mainActivity
 
 
-
-data class VpnLocation(
-    val country: String,
-    val city: String,
-    val code: String,
-    val signalLevel: Int,
-    val isAvailable: Boolean
-)
-
-
-
-fun getDefaultLocations(): List<VpnLocation> = listOf(
-    VpnLocation("Germany", "Frankfurt", "DE", 3, true),
-    VpnLocation("Netherlands", "Amsterdam", "NL", 3, true),
-    VpnLocation("USA", "New York", "US", 2, false),
-    VpnLocation("France", "Paris", "FR", 1, false),
-    VpnLocation("UK", "London", "GB", 2, false)
+data class VpnServer(
+    val country: String,        // Название страны (например, "Germany")
+    val city: String,           // Город (например, "Frankfurt")
+    val code: String,           // Код страны для флага (например, "DE")
+    val signalLevel: Int,       // Уровень сигнала (1–3)
+    val isAvailable: Boolean,   // Доступен ли сервер (для блокировки)
+    val config: String          // WireGuard-конфиг
 )
