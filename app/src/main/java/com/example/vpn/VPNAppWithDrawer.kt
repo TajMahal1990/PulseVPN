@@ -41,27 +41,26 @@ fun VPNAppWithDrawer() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Box(
+                    Row(
                         modifier = Modifier
                             .fillMaxWidth()
                             .padding(horizontal = 16.dp),
-                        contentAlignment = Alignment.Center
+                        verticalAlignment = Alignment.CenterVertically
                     ) {
-                        Row(verticalAlignment = Alignment.CenterVertically) {
-                            Text(
-                                text = "PULSE",
-                                color = Color.White,
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                            Text(
-                                text = "VPN",
-                                color = Color(0xFF00FFC8),
-                                fontWeight = FontWeight.Bold,
-                                style = MaterialTheme.typography.headlineSmall
-                            )
-                        }
+                        Text(
+                            text = "PULSE",
+                            color = Color.White,
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
+                        Text(
+                            text = "VPN",
+                            color = Color(0xFF00FFC8),
+                            fontWeight = FontWeight.Bold,
+                            style = MaterialTheme.typography.headlineSmall
+                        )
                     }
+
 
                     Spacer(modifier = Modifier.height(24.dp))
                     Divider(color = Color(0xFF444A65), thickness = 1.dp)
