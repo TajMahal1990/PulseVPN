@@ -124,6 +124,9 @@ fun VPNAppWithDrawer() {
                             )
                         }
                     },
+                    actions = {
+                        Spacer(modifier = Modifier.width(48.dp)) // баланc справа
+                    },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF0A0F1C),
                         titleContentColor = Color.White
