@@ -46,20 +46,34 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            VPNCard()
+
+            var isPremiumUser by remember { mutableStateOf(false) }
+
+            LaunchedEffect(Unit) {
+                // Логика вызова API и обновления isPremiumUser
+            }
+
+            VPNCard(isPremiumUser = isPremiumUser)
             VPNAppWithDrawer()
         }
+
+
     }
 }
 
 @Composable
-fun VPNCard() {
+fun VPNCard(isPremiumUser: Boolean = true) {
     val context = LocalContext.current
-    val vpnServers = listOf(
+
+    // Все сервера
+    val allVpnServers = listOf(
         VpnLocation("Germany", "Frankfurt", "DE", "🇩🇪", configGermany, 3, true),
         VpnLocation("Singapore", "Singapore", "SG", "🇸🇬", configSingapore, 3, true),
         VpnLocation("France", "Paris", "FR", "🇫🇷", configFrance, 2, false)
     )
+
+    // В базовом режиме — только Германия
+    val vpnServers = if (isPremiumUser) allVpnServers else allVpnServers.filter { it.country == "Germany" }
 
     var selectedServer by remember { mutableStateOf(vpnServers[0]) }
     var showDialog by remember { mutableStateOf(false) }
@@ -91,6 +105,7 @@ fun VPNCard() {
     }
 
     LaunchedEffect(isConnected) {
+
         if (isConnected) {
             var lastRx = 0L
             var lastTx = 0L
@@ -101,8 +116,16 @@ fun VPNCard() {
                     val stats = withContext(Dispatchers.IO) { backend.getStatistics(tunnel) }
                     val rx = stats?.totalRx() ?: 0L
                     val tx = stats?.totalTx() ?: 0L
-                    download.value = formatSpeed(rx - lastRx)
-                    upload.value = formatSpeed(tx - lastTx)
+
+                    // Ограничение скорости для базовых пользователей (пример: максимум 200 KB/s)
+                    val maxSpeedBytes = if (isPremiumUser) Long.MAX_VALUE else 200 * 1024
+
+                    val rxDiff = (rx - lastRx).coerceAtMost(maxSpeedBytes)
+                    val txDiff = (tx - lastTx).coerceAtMost(maxSpeedBytes)
+
+                    download.value = formatSpeed(rxDiff)
+                    upload.value = formatSpeed(txDiff)
+
                     lastRx = rx
                     lastTx = tx
                     connectedTime.value = formatDuration(seconds++)
@@ -114,7 +137,9 @@ fun VPNCard() {
     }
 
     Column(
-        modifier = Modifier.fillMaxSize().padding(horizontal = 32.dp),
+        modifier = Modifier
+            .fillMaxSize()
+            .padding(horizontal = 32.dp),
         horizontalAlignment = Alignment.CenterHorizontally,
         verticalArrangement = Arrangement.Top
     ) {
@@ -141,9 +166,17 @@ fun VPNCard() {
         Spacer(modifier = Modifier.height(24.dp))
         LocationCard(selectedServer)
         Spacer(modifier = Modifier.height(24.dp))
-        Text("↑ ${upload.value}   ↓ ${download.value}", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFB0BEC5))
+        Text(
+            "↑ ${upload.value}   ↓ ${download.value}",
+            style = MaterialTheme.typography.bodyLarge,
+            color = Color(0xFFB0BEC5)
+        )
         Spacer(modifier = Modifier.height(4.dp))
-        Text("Connected: ${connectedTime.value}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFB0BEC5))
+        Text(
+            "Connected: ${connectedTime.value}",
+            style = MaterialTheme.typography.bodySmall,
+            color = Color(0xFFB0BEC5)
+        )
         Spacer(modifier = Modifier.height(32.dp))
         Box(
             modifier = Modifier
@@ -157,7 +190,11 @@ fun VPNCard() {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = Color.Black)
                 Spacer(modifier = Modifier.width(8.dp))
-                Text("Change Server", style = MaterialTheme.typography.labelLarge, color = Color.Black)
+                Text(
+                    "Change Server",
+                    style = MaterialTheme.typography.labelLarge,
+                    color = Color.Black
+                )
             }
         }
         if (showDialog) {
@@ -172,6 +209,7 @@ fun VPNCard() {
         }
     }
 }
+
 
 data class VpnLocation(
     val country: String,
@@ -251,3 +289,19 @@ fun formatSpeed(bytesPerSec: Long): String {
 }
 
 fun formatDuration(seconds: Int): String = "%02d:%02d".format(seconds / 60, seconds % 60)
+
+@Composable
+fun BasicFeatures() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("Basic VPN Features Enabled")
+        // Здесь базовые функции (например, лимит скорости, базовые сервера и т.п.)
+    }
+}
+
+@Composable
+fun PremiumFeatures() {
+    Column(horizontalAlignment = Alignment.CenterHorizontally) {
+        Text("🎉 Premium Features Unlocked!")
+        // Здесь премиум-функции (например, эксклюзивные серверы, безлимит, приоритетный доступ)
+    }
+}

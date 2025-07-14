@@ -2,22 +2,27 @@ package com.example.vpn
 
 
 
-
 import androidx.compose.foundation.background
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
+import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.clip
+import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import kotlinx.coroutines.launch
-import androidx.compose.ui.Alignment
-import androidx.compose.ui.draw.clip
-import androidx.compose.ui.text.font.FontWeight
-import androidx.compose.foundation.shape.RoundedCornerShape
-import androidx.compose.ui.graphics.vector.ImageVector
+
+private val PulseGradient = Brush.horizontalGradient(
+    listOf(Color(0xFF00FFC8), Color(0xFF0078A0))
+)
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -36,75 +41,57 @@ fun VPNAppWithDrawer() {
                 Column(modifier = Modifier.fillMaxSize()) {
                     Spacer(modifier = Modifier.height(32.dp))
 
-                    Text(
-                        text = "PULSE VPN",
-                        color = Color.White,
-                        fontWeight = FontWeight.Bold,
-                        style = MaterialTheme.typography.headlineSmall,
-                        modifier = Modifier.padding(horizontal = 16.dp)
-                    )
+                    Box(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .padding(horizontal = 16.dp),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Row(verticalAlignment = Alignment.CenterVertically) {
+                            Text(
+                                text = "PULSE",
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                            Text(
+                                text = "VPN",
+                                color = Color(0xFF00FFC8),
+                                fontWeight = FontWeight.Bold,
+                                style = MaterialTheme.typography.headlineSmall
+                            )
+                        }
+                    }
 
                     Spacer(modifier = Modifier.height(24.dp))
                     Divider(color = Color(0xFF444A65), thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    DrawerItem(
-                        label = "VPN",
-                        icon = Icons.Default.Lock,
-                        selected = selectedTab == 0,
-                        onClick = {
-                            selectedTab = 0
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                    DrawerItem(
-                        label = "Premium-функция",
-                        icon = Icons.Default.Star,
-                        selected = selectedTab == 1,
-                        onClick = {
-                            selectedTab = 1
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                    DrawerItem(
-                        label = "Настройки",
-                        icon = Icons.Default.Settings,
-                        selected = selectedTab == 2,
-                        onClick = {
-                            selectedTab = 2
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                    DrawerItem(
-                        label = "Отзывы и поддержка",
-                        icon = Icons.Default.Chat,
-                        selected = selectedTab == 3,
-                        onClick = {
-                            selectedTab = 3
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                    DrawerItem(
-                        label = "Оцените приложение",
-                        icon = Icons.Default.ThumbUp,
-                        selected = selectedTab == 4,
-                        onClick = {
-                            selectedTab = 4
-                            scope.launch { drawerState.close() }
-                        }
-                    )
-                    DrawerItem(
-                        label = "Фильтр",
-                        icon = Icons.Default.Tune,
-                        selected = selectedTab == 5,
-                        onClick = {
-                            selectedTab = 5
-                            scope.launch { drawerState.close() }
-                        }
-                    )
+                    DrawerItem("VPN", Icons.Default.Lock, selectedTab == 0) {
+                        selectedTab = 0; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("Premium-функция", Icons.Default.Star, selectedTab == 1) {
+                        selectedTab = 1; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("Настройки", Icons.Default.Settings, selectedTab == 2) {
+                        selectedTab = 2; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("Отзывы и поддержка", Icons.Default.Chat, selectedTab == 3) {
+                        selectedTab = 3; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("Оцените приложение", Icons.Default.ThumbUp, selectedTab == 4) {
+                        selectedTab = 4; scope.launch { drawerState.close() }
+                    }
+                    DrawerItem("Фильтр", Icons.Default.Tune, selectedTab == 5) {
+                        selectedTab = 5; scope.launch { drawerState.close() }
+                    }
 
                     Spacer(modifier = Modifier.weight(1f))
-                    Text("v1.0.0", color = Color.Gray, modifier = Modifier.padding(16.dp))
+                    Text(
+                        text = "v1.0.0",
+                        color = Color.Gray,
+                        modifier = Modifier.padding(16.dp)
+                    )
                 }
             }
         }
@@ -124,36 +111,25 @@ fun VPNAppWithDrawer() {
                         }
                     },
                     navigationIcon = {
-                        if (selectedTab == 0) {
-                            IconButton(onClick = { scope.launch { drawerState.open() } }) {
-                                Icon(
-                                    imageVector = Icons.Default.Menu,
-                                    contentDescription = "Меню",
-                                    tint = Color.White
-                                )
+                        IconButton(
+                            onClick = {
+                                if (selectedTab == 0) scope.launch { drawerState.open() }
+                                else selectedTab = 0
                             }
-                        } else {
-                            IconButton(onClick = { selectedTab = 0 }) {
-                                Icon(
-                                    imageVector = Icons.Default.ArrowBack,
-                                    contentDescription = "Назад",
-                                    tint = Color.White
-                                )
-                            }
+                        ) {
+                            Icon(
+                                imageVector = if (selectedTab == 0) Icons.Default.Menu else Icons.Default.ArrowBack,
+                                contentDescription = null,
+                                tint = Color.White
+                            )
                         }
-                    },
-                    actions = {
-                        Spacer(modifier = Modifier.width(48.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF0A0F1C),
-                        titleContentColor = Color.White,
-                        navigationIconContentColor = Color.White,
-                        actionIconContentColor = Color.White
+                        titleContentColor = Color.White
                     )
                 )
-            }
-            ,
+            },
             containerColor = Color(0xFF0A0F1C)
         ) { innerPadding ->
             Box(
@@ -182,26 +158,34 @@ fun DrawerItem(
     selected: Boolean,
     onClick: () -> Unit
 ) {
-    NavigationDrawerItem(
-        label = {
-            Text(
-                text = label,
-                color = if (selected) Color(0xFF00FFC8) else Color.White,
-                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
-            )
-        },
-        selected = selected,
-        onClick = onClick,
-        icon = {
+    val baseModifier = Modifier
+        .fillMaxWidth()
+        .padding(horizontal = 12.dp, vertical = 6.dp)
+        .clip(RoundedCornerShape(12.dp))
+
+    val modifier = if (selected) {
+        baseModifier.background(PulseGradient)
+    } else {
+        baseModifier.background(Color.Transparent)
+    }
+
+    Box(
+        modifier = modifier
+            .clickable(onClick = onClick)
+            .padding(vertical = 12.dp, horizontal = 16.dp)
+    ) {
+        Row(verticalAlignment = Alignment.CenterVertically) {
             Icon(
                 imageVector = icon,
                 contentDescription = null,
-                tint = if (selected) Color(0xFF00FFC8) else Color.White
+                tint = if (selected) Color.Black else Color.White
             )
-        },
-        modifier = Modifier
-            .padding(horizontal = 12.dp, vertical = 6.dp)
-            .clip(RoundedCornerShape(8.dp))
-    )
+            Spacer(modifier = Modifier.width(12.dp))
+            Text(
+                text = label,
+                color = if (selected) Color.Black else Color.White,
+                fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+            )
+        }
+    }
 }
-
