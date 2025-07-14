@@ -2,6 +2,7 @@ package com.example.vpn
 
 
 
+import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.*
@@ -13,6 +14,7 @@ import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
+import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Brush
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
@@ -137,11 +139,23 @@ fun VPNAppWithDrawer() {
             Box(
                 modifier = Modifier
                     .fillMaxSize()
-                    .padding(innerPadding),
-                contentAlignment = Alignment.Center
+                    .padding(innerPadding)
+                    .background(
+                        Brush.radialGradient(
+                            colors = listOf(
+                                Color(0xFF1A1F2E),
+                                Color(0xFF0A0F1C)
+                            ),
+                            radius = 1000f
+                        )
+                    )
             ) {
+                // неоновый эффект точек (опционально)
+                NeonParticles() // описано ниже
+
                 when (selectedTab) {
                     0 -> VPNCard()
+
                     1 -> AccountScreen()
                     2 -> SettingsScreen()
                     3 -> SupportScreen()
@@ -187,6 +201,22 @@ fun DrawerItem(
                 text = label,
                 color = if (selected) Color.Black else Color.White,
                 fontWeight = if (selected) FontWeight.Bold else FontWeight.Normal
+            )
+        }
+    }
+}
+@Composable
+fun NeonParticles() {
+    Canvas(modifier = Modifier.fillMaxSize()) {
+        for (i in 1..40) {
+            val x = (0..size.width.toInt()).random().toFloat()
+            val y = (0..size.height.toInt()).random().toFloat()
+            val radius = (1..6).random().toFloat()
+
+            drawCircle(
+                color = Color(0xFF00FFC8).copy(alpha = 0.08f),
+                radius = radius,
+                center = Offset(x, y)
             )
         }
     }
