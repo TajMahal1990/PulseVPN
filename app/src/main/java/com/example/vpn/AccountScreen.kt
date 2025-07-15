@@ -28,10 +28,16 @@ import androidx.compose.ui.text.style.TextAlign
 
 @Composable
 fun AccountScreen() {
-    var selectedPlan by remember { mutableStateOf("month") }
-    val selectedPrice = if (selectedPlan == "year") "$39.00 / year" else "$7.99 / month"
+    /* ─── выбранный план ─── */
+    var selectedPlan by remember { mutableStateOf("month") }   // "month" | "year"
 
+    /* ─── текст на кнопке ─── */
+    val buttonText = if (selectedPlan == "year")
+        "Try for 0.00"               // бесплатный три-ал для годового
+    else
+        "$7.99 / month"
 
+    /* ─── UI ─── */
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -40,102 +46,94 @@ fun AccountScreen() {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-        Text("Premium Features", style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp), color = Color.White)
+
+        /* ---------- Заголовок ---------- */
+        Text(
+            "Premium Features",
+            style  = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
+            color  = Color.White
+        )
+
         Spacer(Modifier.height(24.dp))
 
+        /* ---------- Таблица преимуществ ---------- */
         Text("What’s included", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
 
+        /* шапка Free / Premium */
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
-            Text(
-                text = "",
-                modifier = Modifier.weight(1f) // пустая ячейка под описание фичи
-            )
-            Text(
-                "Free",
-                color = Color.Gray,
-                fontSize = 14.sp,
-                modifier = Modifier.weight(0.5f),
-                textAlign = TextAlign.Center
-            )
-            Text(
-                "Premium",
-                color = Color(0xFF00FFC8),
-                fontSize = 14.sp,
-                modifier = Modifier.weight(0.5f),
-                textAlign = TextAlign.Center
-            )
+            Text("", modifier = Modifier.weight(1f))   // пустая колонка под описание
+            Text("Free",    color = Color.Gray,       modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text("Premium", color = Color(0xFF00FFC8),modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
         }
-
 
         Spacer(Modifier.height(8.dp))
 
-        ComparisonRow("🌍 Locations", "Germany only", "All countries")
-        ComparisonRow("⚡ Speed", "Limited (5 Mbps)", "Unlimited")
-        ComparisonRow("🔒 Encryption", "Standard", "Military-grade")
-        ComparisonRow("📞 Support", "Email only", "Personal assistant")
-        ComparisonRow("⏱ Daily time limit", "15 min/day", "Unlimited")
+        ComparisonRow("🌍 Locations",          "Germany only", "All countries")
+        ComparisonRow("⚡ Speed",              "Limited (5 Mbps)", "Unlimited")
+        ComparisonRow("🔒 Encryption",         "Standard", "Military-grade")
+        ComparisonRow("🤖 Support",            "Email only", "Personal assistant")
+        ComparisonRow("⏱ Daily time limit",   "15 min/day", "Unlimited")
 
-
-
-
+        /* ---------- Разделитель ---------- */
         Spacer(Modifier.height(36.dp))
-        Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 1.dp)
+        Divider(color = Color.DarkGray.copy(alpha = 0.5f))
         Spacer(Modifier.height(36.dp))
 
+        /* ---------- Выбор плана ---------- */
         Text("Choose your plan", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
         Spacer(Modifier.height(16.dp))
 
         PlanOption(
-            title = "1-Year Plan",
-            subPrice = "$3.25/mo billed yearly",
-            trialText = "3-day free trial, then $39.00/year",
-            tag = "Most popular",
-            selected = selectedPlan == "year",
-            onClick = { selectedPlan = "year" }
+            title     = "1-Year Plan",
+            subPrice  = "$3.25 / month billed yearly",
+            trialText = "3-day free trial, then \$39.00 / year",
+            tag       = "Most popular",
+            selected  = selectedPlan == "year",
+            onClick   = { selectedPlan = "year" }
         )
 
-        Spacer(modifier = Modifier.height(16.dp))
+        Spacer(Modifier.height(16.dp))
 
         PlanOption(
-            title = "1-Month Plan",
-            subPrice = "$7.99/mo",
-            trialText = "3-day free trial, then $7.99/month",
-            tag = null,
-            selected = selectedPlan == "month",
-            onClick = { selectedPlan = "month" }
+            title     = "1-Month Plan",
+            subPrice  = "$7.99 / month",
+            trialText = "",                                      // без trial-текста
+            tag       = null,
+            selected  = selectedPlan == "month",
+            onClick   = { selectedPlan = "month" }
         )
 
+        /* ---------- Кнопка покупки ---------- */
         Spacer(Modifier.height(36.dp))
 
         Button(
-            onClick = { /* TODO: handle purchase */ },
-            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
+            onClick = { /* TODO: launch purchase flow */ },
+            colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
                 .clip(RoundedCornerShape(16.dp))
         ) {
             Text(
-                text = selectedPrice,
-                color = Color.Black,
-                fontWeight = FontWeight.Bold,
-                fontSize = 17.sp
+                text      = buttonText,
+                color     = Color.Black,
+                fontSize  = 17.sp,
+                fontWeight = FontWeight.Bold
             )
         }
 
+        /* ---------- футер ---------- */
         Spacer(Modifier.height(36.dp))
-        Text("App version: 1.0.0", fontSize = 12.sp, color = Color.Gray)
+        Text("App version: 1.0.0", color = Color.Gray, fontSize = 12.sp)
         Spacer(Modifier.height(12.dp))
     }
 }
-
 @Composable
 fun PlanOption(
     title: String,              // "1-Year Plan" или "1-Month Plan"
