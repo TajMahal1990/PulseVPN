@@ -13,6 +13,8 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Brush
+import androidx.compose.ui.tooling.preview.Preview
+
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
@@ -56,7 +58,7 @@ fun AccountScreen() {
                 modifier = Modifier.weight(1f) // пустая ячейка под описание фичи
             )
             Text(
-                "Basic",
+                "Free",
                 color = Color.Gray,
                 fontSize = 14.sp,
                 modifier = Modifier.weight(0.5f),
@@ -74,11 +76,14 @@ fun AccountScreen() {
 
         Spacer(Modifier.height(8.dp))
 
-        ComparisonRow("🌍 Germany / Netherlands", true, true)
-        ComparisonRow("🌍 All countries", false, true)
-        ComparisonRow("⚡ Faster connection", false, true)
-        ComparisonRow("🛡️ Priority support", false, true)
-        ComparisonRow("🚫 No ads", false, true)
+        ComparisonRow("🌍 Locations", "Germany only", "All countries")
+        ComparisonRow("⚡ Speed", "Limited (5 Mbps)", "Unlimited")
+        ComparisonRow("🔒 Encryption", "Standard", "Military-grade")
+        ComparisonRow("📞 Support", "Email only", "Personal assistant")
+        ComparisonRow("⏱ Daily time limit", "15 min/day", "Unlimited")
+
+
+
 
         Spacer(Modifier.height(36.dp))
         Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 1.dp)
@@ -214,34 +219,47 @@ fun PlanOption(
 }
 
 @Composable
-fun ComparisonRow(feature: String, basic: Boolean, premium: Boolean) {
+fun ComparisonRow(
+    feature: String,
+    basicValue: String,     // пример: "15 min/day"
+    premiumValue: String    // пример: "Unlimited"
+) {
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(vertical = 8.dp),
+            .padding(vertical = 10.dp),
         verticalAlignment = Alignment.CenterVertically
     ) {
+        // Название фичи
         Text(
-            feature,
+            text = feature,
             color = Color.White,
             fontSize = 15.sp,
+            modifier = Modifier.weight(1.5f)
+        )
+
+        // Значение для Basic
+        Text(
+            text = basicValue,
+            color = Color.Gray,
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center,
             modifier = Modifier.weight(1f)
         )
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            tint = if (basic) Color(0xFF00FFC8) else Color.Gray,
-            modifier = Modifier
-                .weight(0.5f)
-                .size(20.dp)
-        )
-        Icon(
-            imageVector = Icons.Default.Check,
-            contentDescription = null,
-            tint = if (premium) Color(0xFF00FFC8) else Color.Gray,
-            modifier = Modifier
-                .weight(0.5f)
-                .size(20.dp)
+
+        // Значение для Premium
+        Text(
+            text = premiumValue,
+            color = Color(0xFF00FFC8),
+            fontSize = 14.sp,
+            textAlign = TextAlign.Center,
+            modifier = Modifier.weight(1f)
         )
     }
+}
+
+@Preview(showBackground = true, backgroundColor = 0xFF0A0F1C)
+@Composable
+fun AccountScreenPreview() {
+    AccountScreen()
 }
