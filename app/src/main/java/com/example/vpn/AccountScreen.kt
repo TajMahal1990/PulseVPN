@@ -18,113 +18,195 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.android.billingclient.api.ProductDetails
+import androidx.compose.foundation.verticalScroll
+import androidx.compose.foundation.rememberScrollState
+import androidx.compose.ui.text.style.TextAlign
+
 
 @Composable
 fun AccountScreen() {
+    var selectedPlan by remember { mutableStateOf("month") }
+    val selectedPrice = if (selectedPlan == "year") "$39.00 / year" else "$7.99 / month"
+
+
     Column(
         modifier = Modifier
             .fillMaxSize()
             .background(Color(0xFF0A0F1C))
+            .verticalScroll(rememberScrollState())
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Text("Premium Features", style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp), color = Color.White)
-        Spacer(modifier = Modifier.height(24.dp))
+        Spacer(Modifier.height(24.dp))
 
-        // Comparison Section
         Text("What’s included", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
-        Spacer(modifier = Modifier.height(8.dp))
+        Spacer(Modifier.height(8.dp))
 
         Row(
             modifier = Modifier
                 .fillMaxWidth()
                 .padding(horizontal = 16.dp),
-            horizontalArrangement = Arrangement.SpaceBetween
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
         ) {
-            Spacer(modifier = Modifier.width(100.dp))
-            Text("Basic", color = Color.Gray, fontSize = 14.sp)
-            Text("Premium", color = Color(0xFF00FFC8), fontSize = 14.sp)
+            Text(
+                text = "",
+                modifier = Modifier.weight(1f) // пустая ячейка под описание фичи
+            )
+            Text(
+                "Basic",
+                color = Color.Gray,
+                fontSize = 14.sp,
+                modifier = Modifier.weight(0.5f),
+                textAlign = TextAlign.Center
+            )
+            Text(
+                "Premium",
+                color = Color(0xFF00FFC8),
+                fontSize = 14.sp,
+                modifier = Modifier.weight(0.5f),
+                textAlign = TextAlign.Center
+            )
         }
 
-        Spacer(modifier = Modifier.height(8.dp))
 
-        ComparisonRow("\uD83C\uDF0D Germany / Netherlands", true, true)
-        ComparisonRow("\uD83C\uDF0D All countries", false, true)
+        Spacer(Modifier.height(8.dp))
+
+        ComparisonRow("🌍 Germany / Netherlands", true, true)
+        ComparisonRow("🌍 All countries", false, true)
         ComparisonRow("⚡ Faster connection", false, true)
-        ComparisonRow("\uD83D\uDD1A Priority support", false, true)
-        ComparisonRow("\uD83D\uDEAB No ads", false, true)
+        ComparisonRow("🛡️ Priority support", false, true)
+        ComparisonRow("🚫 No ads", false, true)
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(Modifier.height(36.dp))
         Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 1.dp)
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(Modifier.height(36.dp))
 
-        // Plan Grid
         Text("Choose your plan", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
+        Spacer(Modifier.height(16.dp))
+
+        PlanOption(
+            title = "1-Year Plan",
+            subPrice = "$3.25/mo billed yearly",
+            trialText = "3-day free trial, then $39.00/year",
+            tag = "Most popular",
+            selected = selectedPlan == "year",
+            onClick = { selectedPlan = "year" }
+        )
+
         Spacer(modifier = Modifier.height(16.dp))
 
-        Column {
-            PlanOption("1 Month", "$3.99 / month", "3 дня бесплатно, далее $3.99 в месяц", null, selected = true)
-            Spacer(modifier = Modifier.height(12.dp))
-            PlanOption("12 Months", "$29.99 / year", "3 дня бесплатно, далее $29.99 в год", "Save 38% • You save $2.33/mo", selected = false)
-        }
+        PlanOption(
+            title = "1-Month Plan",
+            subPrice = "$7.99/mo",
+            trialText = "3-day free trial, then $7.99/month",
+            tag = null,
+            selected = selectedPlan == "month",
+            onClick = { selectedPlan = "month" }
+        )
 
-        Spacer(modifier = Modifier.height(36.dp))
+        Spacer(Modifier.height(36.dp))
 
         Button(
-            onClick = { },
+            onClick = { /* TODO: handle purchase */ },
             colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
             modifier = Modifier
                 .fillMaxWidth()
                 .height(54.dp)
                 .clip(RoundedCornerShape(16.dp))
         ) {
-            Text("Go Premium \uD83D\uDE80", color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 17.sp)
+            Text(
+                text = selectedPrice,
+                color = Color.Black,
+                fontWeight = FontWeight.Bold,
+                fontSize = 17.sp
+            )
         }
 
-        Spacer(modifier = Modifier.height(36.dp))
-
+        Spacer(Modifier.height(36.dp))
         Text("App version: 1.0.0", fontSize = 12.sp, color = Color.Gray)
+        Spacer(Modifier.height(12.dp))
     }
 }
 
 @Composable
-fun PlanOption(duration: String, price: String, tag: String?, savings: String?, selected: Boolean) {
-    val border = if (selected) Modifier.border(2.dp, Color(0xFF00FFC8), RoundedCornerShape(18.dp)) else Modifier
+fun PlanOption(
+    title: String,              // "1-Year Plan" или "1-Month Plan"
+    subPrice: String,           // "$3.25/mo billed yearly" или "$7.99/mo"
+    trialText: String,          // "3-day free trial, then $39.00/year"
+    tag: String?,               // "Most popular" или null
+    selected: Boolean,
+    onClick: () -> Unit
+) {
+    val border = if (selected)
+        Modifier.border(2.dp, Color(0xFF00FFC8), RoundedCornerShape(18.dp))
+    else Modifier
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
             .then(border)
             .clip(RoundedCornerShape(18.dp))
-            .background(
-                brush = Brush.horizontalGradient(
-                    colors = listOf(Color(0xFF00FFC8), Color(0xFF0078A0))
-                )
-            )
-            .clickable { }
+            .background(Color(0xFF101624)) // тёмный фон
+            .clickable { onClick() }
             .padding(vertical = 20.dp, horizontal = 16.dp)
     ) {
         Row(
             verticalAlignment = Alignment.CenterVertically,
-            horizontalArrangement = Arrangement.SpaceBetween,
             modifier = Modifier.fillMaxWidth()
         ) {
-            Column {
-                Text(duration, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
-                Text(price, color = Color.Black, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-                if (savings != null) {
-                    Spacer(modifier = Modifier.height(4.dp))
-                    Text(savings, color = Color.White, fontSize = 12.sp)
-                }
+            RadioButton(
+                selected = selected,
+                onClick = onClick,
+                colors = RadioButtonDefaults.colors(
+                    selectedColor = Color(0xFF00FFC8),
+                    unselectedColor = Color.White.copy(alpha = 0.5f)
+                )
+            )
+
+            Spacer(modifier = Modifier.width(12.dp))
+
+            Column(modifier = Modifier.weight(1f)) {
+                Text(
+                    text = title,
+                    color = Color.White,
+                    fontWeight = FontWeight.Bold,
+                    fontSize = 18.sp
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = subPrice,
+                    color = Color(0xFF00FFC8),
+                    fontSize = 15.sp,
+                    fontWeight = FontWeight.SemiBold
+                )
+
+                Spacer(modifier = Modifier.height(4.dp))
+
+                Text(
+                    text = trialText,
+                    color = Color.Gray,
+                    fontSize = 13.sp
+                )
             }
-            if (tag != null) {
+
+            if (!tag.isNullOrBlank()) {
                 Box(
                     modifier = Modifier
                         .clip(RoundedCornerShape(8.dp))
-                        .background(Color.White.copy(alpha = 0.3f))
-                        .padding(horizontal = 12.dp, vertical = 6.dp)
+                        .background(Color(0xFF00FFC8).copy(alpha = 0.15f))
+                        .padding(horizontal = 10.dp, vertical = 4.dp)
                 ) {
-                    Text(tag, fontSize = 13.sp, color = Color.White, fontWeight = FontWeight.Bold)
+                    Text(
+                        text = tag,
+                        fontSize = 12.sp,
+                        fontWeight = FontWeight.SemiBold,
+                        color = Color(0xFF00FFC8)
+                    )
                 }
             }
         }
@@ -137,24 +219,29 @@ fun ComparisonRow(feature: String, basic: Boolean, premium: Boolean) {
         modifier = Modifier
             .fillMaxWidth()
             .padding(vertical = 8.dp),
-        verticalAlignment = Alignment.CenterVertically,
-        horizontalArrangement = Arrangement.SpaceBetween
+        verticalAlignment = Alignment.CenterVertically
     ) {
-        Text(feature, color = Color.White, fontSize = 15.sp)
-        Row {
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = if (basic) Color(0xFF00FFC8) else Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-            Spacer(modifier = Modifier.width(24.dp))
-            Icon(
-                imageVector = Icons.Default.Check,
-                contentDescription = null,
-                tint = if (premium) Color(0xFF00FFC8) else Color.Gray,
-                modifier = Modifier.size(20.dp)
-            )
-        }
+        Text(
+            feature,
+            color = Color.White,
+            fontSize = 15.sp,
+            modifier = Modifier.weight(1f)
+        )
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null,
+            tint = if (basic) Color(0xFF00FFC8) else Color.Gray,
+            modifier = Modifier
+                .weight(0.5f)
+                .size(20.dp)
+        )
+        Icon(
+            imageVector = Icons.Default.Check,
+            contentDescription = null,
+            tint = if (premium) Color(0xFF00FFC8) else Color.Gray,
+            modifier = Modifier
+                .weight(0.5f)
+                .size(20.dp)
+        )
     }
 }

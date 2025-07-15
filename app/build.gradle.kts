@@ -69,6 +69,10 @@ dependencies {
     implementation ("com.squareup.retrofit2:retrofit:2.9.0")
     implementation ("com.squareup.retrofit2:converter-gson:2.9.0")
 
+    implementation ("com.android.billingclient:billing:8.0.0")
+    implementation ("com.android.billingclient:billing-ktx:8.0.0")
+
+
 
 
 }

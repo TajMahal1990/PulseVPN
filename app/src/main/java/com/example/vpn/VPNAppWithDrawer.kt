@@ -50,7 +50,7 @@ fun VPNAppWithDrawer() {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "PULSE",
+                            text = "ASTRO",
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineSmall
@@ -106,7 +106,7 @@ fun VPNAppWithDrawer() {
                             contentAlignment = Alignment.Center
                         ) {
                             Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("PULSE", color = Color.White, fontWeight = FontWeight.Bold)
+                                Text("ASTRO", color = Color.White, fontWeight = FontWeight.Bold)
                                 Text("VPN", color = Color(0xFF00FFC8), fontWeight = FontWeight.Bold)
                             }
                         }

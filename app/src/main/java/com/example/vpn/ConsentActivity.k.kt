@@ -109,7 +109,7 @@ fun ConsentScreen(onAgree: () -> Unit) {
 
                     // 🔷 Лого
                     Image(
-                        painter = painterResource(id = R.drawable.vpnlogo__1_),
+                        painter = painterResource(id = R.drawable.b8fc9d34_55be_4127_be5d_59fbb9d72113__1_),
                         contentDescription = null,
                         modifier = Modifier.size(100.dp)
                     )
