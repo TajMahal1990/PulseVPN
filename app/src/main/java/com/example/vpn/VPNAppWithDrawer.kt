@@ -28,7 +28,7 @@ private val PulseGradient = Brush.horizontalGradient(
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun VPNAppWithDrawer() {
+fun VPNAppWithDrawer(isPremiumUser: Boolean) {
     val drawerState = rememberDrawerState(DrawerValue.Closed)
     val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf(0) }
@@ -154,7 +154,7 @@ fun VPNAppWithDrawer() {
                 NeonParticles() // описано ниже
 
                 when (selectedTab) {
-                    0 -> VPNCard()
+                    0 -> VPNCard(isPremiumUser = isPremiumUser)
 
                     1 -> AccountScreen()
                     2 -> SettingsScreen()

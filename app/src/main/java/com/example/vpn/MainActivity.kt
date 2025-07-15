@@ -5,7 +5,9 @@ package com.example.vpn
 
 
 
+import androidx.compose.runtime.saveable.rememberSaveable
 
+import com.example.vpn.Premium.FreePlanLimiter
 
 import android.app.Activity
 import android.os.Bundle
@@ -21,6 +23,7 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -34,184 +37,162 @@ import com.example.vpn.mainActivity.ServerDialog
 import com.wireguard.android.backend.GoBackend
 import com.wireguard.android.backend.Tunnel
 import com.wireguard.config.Config
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.delay
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.StringReader
+import java.util.concurrent.TimeUnit
 
 
+
+/**
+ * Re-organised version splitting FREE vs PREMIUM logic.
+ * FREE tier: one server (Germany), 200 KB/s cap, 15 min/day connection budget.
+ * Premium: no limits.
+ */
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-
-            var isPremiumUser by remember { mutableStateOf(false) }
-
-            LaunchedEffect(Unit) {
-                // Логика вызова API и обновления isPremiumUser
-            }
-
-            VPNCard(isPremiumUser = isPremiumUser)
-            VPNAppWithDrawer()
+            val isPremiumUser by rememberSaveable { mutableStateOf(false) }
+            VPNAppWithDrawer(isPremiumUser = isPremiumUser)
         }
-
-
     }
 }
 
+
 @Composable
-fun VPNCard(isPremiumUser: Boolean = true) {
+fun VPNCard(isPremiumUser: Boolean) {
     val context = LocalContext.current
 
-    // Все сервера
-    val allVpnServers = listOf(
+    /* ----- Server list ----- */
+    val allServers = listOf(
         VpnLocation("Germany", "Frankfurt", "DE", "🇩🇪", configGermany, 3, true),
         VpnLocation("Singapore", "Singapore", "SG", "🇸🇬", configSingapore, 3, true),
         VpnLocation("France", "Paris", "FR", "🇫🇷", configFrance, 2, false)
     )
+    val servers = if (isPremiumUser) allServers else allServers.take(1)
 
-    // В базовом режиме — только Германия
-    val vpnServers = if (isPremiumUser) allVpnServers else allVpnServers.filter { it.country == "Germany" }
-
-    var selectedServer by remember { mutableStateOf(vpnServers[0]) }
+    var selected by remember { mutableStateOf(servers[0]) }
     var showDialog by remember { mutableStateOf(false) }
     var isConnected by remember { mutableStateOf(false) }
-    var vpnError by remember { mutableStateOf<String?>(null) }
-    val connectedTime = remember { mutableStateOf("00:00") }
-    val upload = remember { mutableStateOf("0 KB/s") }
-    val download = remember { mutableStateOf("0 KB/s") }
+    var err by remember { mutableStateOf<String?>(null) }
 
+    val up = remember { mutableStateOf("0 KB/s") }
+    val down = remember { mutableStateOf("0 KB/s") }
+    val duration = remember { mutableStateOf("00:00") }
+
+    /* ----- Free‑plan limiter ----- */
+    val limiter: FreePlanLimiter = remember { FreePlanLimiter(context) }
+
+
+    /* ----- WireGuard backend ----- */
     val backend = remember { GoBackend(context) }
     val tunnel = remember {
         object : Tunnel {
-            override fun getName() = selectedServer.city
+            override fun getName() = selected.city
             override fun onStateChange(newState: Tunnel.State) {}
         }
     }
 
+    /* ----- Permission launcher ----- */
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
-    ) { result ->
-        if (result.resultCode == Activity.RESULT_OK) {
-            launchVpn(backend, tunnel, selectedServer.config) {
+    ) { res ->
+        if (res.resultCode == Activity.RESULT_OK) {
+            startVpn(backend, tunnel, selected.config) {
                 isConnected = it
-                vpnError = if (it) null else "Ошибка при запуске VPN"
+                if (!it) err = "Failed to start VPN"
             }
-        } else {
-            vpnError = "Разрешение на VPN отклонено"
-        }
+        } else err = "VPN permission denied"
     }
 
+    /* ----- Traffic + timer loop ----- */
     LaunchedEffect(isConnected) {
-
         if (isConnected) {
-            var lastRx = 0L
-            var lastTx = 0L
-            var seconds = 0
-
+            var lastRx = 0L; var lastTx = 0L; var sec = 0
             while (isConnected) {
-                try {
-                    val stats = withContext(Dispatchers.IO) { backend.getStatistics(tunnel) }
-                    val rx = stats?.totalRx() ?: 0L
-                    val tx = stats?.totalTx() ?: 0L
-
-                    // Ограничение скорости для базовых пользователей (пример: максимум 200 KB/s)
-                    val maxSpeedBytes = if (isPremiumUser) Long.MAX_VALUE else 200 * 1024
-
-                    val rxDiff = (rx - lastRx).coerceAtMost(maxSpeedBytes)
-                    val txDiff = (tx - lastTx).coerceAtMost(maxSpeedBytes)
-
-                    download.value = formatSpeed(rxDiff)
-                    upload.value = formatSpeed(txDiff)
-
-                    lastRx = rx
-                    lastTx = tx
-                    connectedTime.value = formatDuration(seconds++)
-                } catch (_: Exception) {}
+                if (!isPremiumUser && !limiter.tick()) {
+                    stopVpn(backend, tunnel) { isConnected = false }; break
+                }
+                val stats = withContext(Dispatchers.IO) { backend.getStatistics(tunnel) }
+                val rx = stats?.totalRx() ?: 0L
+                val tx = stats?.totalTx() ?: 0L
+                val cap = if (isPremiumUser) Long.MAX_VALUE else 200 * 1024L
+                down.value = formatSpeed((rx - lastRx).coerceAtMost(cap))
+                up.value = formatSpeed((tx - lastTx).coerceAtMost(cap))
+                lastRx = rx; lastTx = tx
+                duration.value = formatDuration(++sec)
                 delay(1000)
             }
-            connectedTime.value = "00:00"
+        } else {
+            duration.value = "00:00"; up.value = "0 KB/s"; down.value = "0 KB/s"
         }
     }
 
-    Column(
-        modifier = Modifier
-            .fillMaxSize()
-            .padding(horizontal = 32.dp),
-        horizontalAlignment = Alignment.CenterHorizontally,
-        verticalArrangement = Arrangement.Top
-    ) {
-        Spacer(modifier = Modifier.height(24.dp))
-        AnimatedConnectionCircle(isConnected = isConnected, onToggle = {
-            if (!isConnected) {
-                val intent = GoBackend.VpnService.prepare(context)
-                if (intent != null) {
-                    vpnPermissionLauncher.launch(intent)
-                } else {
-                    launchVpn(backend, tunnel, selectedServer.config) {
-                        isConnected = it
-                        vpnError = if (it) null else "Ошибка при запуске VPN"
-                    }
-                }
-            } else {
-                stopVpn(
-                    backend, tunnel,
-                    onSuccess = { isConnected = false },
-                    onError = { vpnError = it }
-                )
+    /* ----- UI ----- */
+    Column(Modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+        Spacer(Modifier.height(24.dp))
+
+        AnimatedConnectionCircle(isConnected) {
+            if (isConnected) stopVpn(backend, tunnel) { isConnected = false }
+            else if (!isPremiumUser && limiter.remaining() <= 0) err = "Free daily limit used up"
+            else {
+                GoBackend.VpnService.prepare(context)?.let(vpnPermissionLauncher::launch)
+                    ?: startVpn(backend, tunnel, selected.config) { isConnected = it; if (!it) err = "Failed to start VPN" }
             }
-        })
-        Spacer(modifier = Modifier.height(24.dp))
-        LocationCard(selectedServer)
-        Spacer(modifier = Modifier.height(24.dp))
-        Text(
-            "↑ ${upload.value}   ↓ ${download.value}",
-            style = MaterialTheme.typography.bodyLarge,
-            color = Color(0xFFB0BEC5)
-        )
-        Spacer(modifier = Modifier.height(4.dp))
-        Text(
-            "Connected: ${connectedTime.value}",
-            style = MaterialTheme.typography.bodySmall,
-            color = Color(0xFFB0BEC5)
-        )
-        Spacer(modifier = Modifier.height(32.dp))
+        }
+
+        Spacer(Modifier.height(24.dp))
+        LocationCard(selected)
+        Spacer(Modifier.height(16.dp))
+
+        Text("↑ ${up.value}   ↓ ${down.value}", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFB0BEC5))
+        Text("Connected: ${duration.value}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFB0BEC5))
+
+        if (!isPremiumUser) {
+            Spacer(Modifier.height(16.dp))
+            Column(
+                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF2A2E3E)).padding(12.dp)
+            ) {
+                Text("🔒 Free plan enabled", color = Color(0xFFFFA726), style = MaterialTheme.typography.bodyLarge)
+                Text("Germany only · 200 KB/s · 15 min/day", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                Spacer(Modifier.height(6.dp))
+                Row(verticalAlignment = Alignment.CenterVertically) {
+                    Text("⏳ Remaining time: ", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                    Text(
+                        formatDuration(limiter.remaining()),
+                        color = if (limiter.remaining() <= 60) Color.Red else Color(0xFF00FFC8),
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                }
+            }
+        }
+
+        Spacer(Modifier.height(32.dp))
         Box(
-            modifier = Modifier
-                .height(48.dp)
-                .width(200.dp)
-                .clip(RoundedCornerShape(16.dp))
+            Modifier.height(48.dp).width(200.dp).clip(RoundedCornerShape(16.dp))
                 .background(Brush.horizontalGradient(listOf(Color(0xFF00FFC8), Color(0xFF0078A0))))
-                .clickable { showDialog = true },
-            contentAlignment = Alignment.Center
+                .clickable { showDialog = true }, contentAlignment = Alignment.Center
         ) {
             Row(verticalAlignment = Alignment.CenterVertically) {
                 Icon(Icons.Default.Person, contentDescription = null, tint = Color.Black)
-                Spacer(modifier = Modifier.width(8.dp))
-                Text(
-                    "Change Server",
-                    style = MaterialTheme.typography.labelLarge,
-                    color = Color.Black
-                )
+                Spacer(Modifier.width(8.dp))
+                Text("Change Server", style = MaterialTheme.typography.labelLarge, color = Color.Black)
             }
         }
+
         if (showDialog) {
-            ServerDialog(vpnServers, onSelect = {
-                selectedServer = it
-                showDialog = false
-            }, onDismiss = { showDialog = false })
+            ServerDialog(servers, { selected = it; showDialog = false }, { showDialog = false })
         }
-        vpnError?.let {
-            Spacer(modifier = Modifier.height(8.dp))
-            Text(it, color = MaterialTheme.colorScheme.error)
-        }
+
+        err?.let { Spacer(Modifier.height(12.dp)); Text(it, color = MaterialTheme.colorScheme.error) }
     }
 }
 
+
+
+/* =============== HELPERS =============== */
 
 data class VpnLocation(
     val country: String,
@@ -234,76 +215,26 @@ PresharedKey = 9LLvDv0QOQ52zDy+UGlr4dGPghLaTrGWCY6Wg7ZaCK0=
 Endpoint = 79.133.46.112:56258
 AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
 
-val configSingapore = """[Interface]
-PrivateKey = ...
-Address = ...
-DNS = 1.1.1.1
+val configSingapore = """[Interface]\nPrivateKey=...\nAddress=...\nDNS=1.1.1.1\n[Peer]\nPublicKey=...\nEndpoint=...\nAllowedIPs=0.0.0.0/0,::/0"""
+val configFrance = configSingapore
 
-[Peer]
-PublicKey = ...
-Endpoint = ...
-AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
-
-val configFrance = """[Interface]
-PrivateKey = ...
-Address = ...
-DNS = 1.1.1.1
-
-[Peer]
-PublicKey = ...
-Endpoint = ...
-AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
-
-fun launchVpn(backend: GoBackend, tunnel: Tunnel, configString: String, onResult: (Boolean) -> Unit) {
+fun startVpn(backend: GoBackend, tunnel: Tunnel, cfg: String, cb: (Boolean) -> Unit) {
     CoroutineScope(Dispatchers.Main).launch {
-        delay(100)
         try {
-            val config = withContext(Dispatchers.IO) {
-                Config.parse(BufferedReader(StringReader(configString)))
-            }
-            withContext(Dispatchers.IO) {
-                backend.setState(tunnel, Tunnel.State.UP, config)
-            }
-            onResult(true)
-        } catch (e: Exception) {
-            onResult(false)
-        }
+            val config = withContext(Dispatchers.IO) { Config.parse(BufferedReader(StringReader(cfg))) }
+            withContext(Dispatchers.IO) { backend.setState(tunnel, Tunnel.State.UP, config) }
+            cb(true)
+        } catch (e: Exception) { cb(false) }
     }
 }
 
-fun stopVpn(backend: GoBackend, tunnel: Tunnel, onSuccess: () -> Unit, onError: (String) -> Unit) {
-    try {
-        backend.setState(tunnel, Tunnel.State.DOWN, null)
-        onSuccess()
-    } catch (e: Exception) {
-        onError(e.message ?: "неизвестно")
-    }
+fun stopVpn(backend: GoBackend, tunnel: Tunnel, cb: () -> Unit) = try {
+    backend.setState(tunnel, Tunnel.State.DOWN, null); cb()
+} catch (e: Exception) {}
+
+fun formatSpeed(bps: Long): String {
+    val kb = bps / 1024.0; val mb = kb / 1024.0
+    return when { mb >= 1 -> "%.1f MB/s".format(mb); kb >= 1 -> "%.1f KB/s".format(kb); else -> "$bps B/s" }
 }
 
-fun formatSpeed(bytesPerSec: Long): String {
-    val kb = bytesPerSec / 1024.0
-    val mb = kb / 1024.0
-    return when {
-        mb >= 1 -> "%.1f MB/s".format(mb)
-        kb >= 1 -> "%.1f KB/s".format(kb)
-        else -> "$bytesPerSec B/s"
-    }
-}
-
-fun formatDuration(seconds: Int): String = "%02d:%02d".format(seconds / 60, seconds % 60)
-
-@Composable
-fun BasicFeatures() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("Basic VPN Features Enabled")
-        // Здесь базовые функции (например, лимит скорости, базовые сервера и т.п.)
-    }
-}
-
-@Composable
-fun PremiumFeatures() {
-    Column(horizontalAlignment = Alignment.CenterHorizontally) {
-        Text("🎉 Premium Features Unlocked!")
-        // Здесь премиум-функции (например, эксклюзивные серверы, безлимит, приоритетный доступ)
-    }
-}
+fun formatDuration(s: Int): String = "%02d:%02d".format(s / 60, s % 60)
