@@ -63,7 +63,6 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                         )
                     }
 
-
                     Spacer(modifier = Modifier.height(24.dp))
                     Divider(color = Color(0xFF444A65), thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
@@ -101,13 +100,33 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
             topBar = {
                 TopAppBar(
                     title = {
-                        Box(
-                            modifier = Modifier.fillMaxWidth(),
-                            contentAlignment = Alignment.Center
+                        Row(
+                            verticalAlignment = Alignment.CenterVertically,
+                            horizontalArrangement = Arrangement.Center,
+                            modifier = Modifier.fillMaxWidth()
                         ) {
-                            Row(verticalAlignment = Alignment.CenterVertically) {
-                                Text("ASTRO", color = Color.White, fontWeight = FontWeight.Bold)
-                                Text("VPN", color = Color(0xFF00FFC8), fontWeight = FontWeight.Bold)
+                            Text("ASTRO", color = Color.White, fontWeight = FontWeight.Bold)
+                            Text("VPN", color = Color(0xFF00FFC8), fontWeight = FontWeight.Bold)
+                            Spacer(Modifier.width(8.dp))
+
+                            if (isPremiumUser) {
+                                Icon(
+                                    imageVector = Icons.Default.Star,
+                                    contentDescription = "Premium",
+                                    tint = Color(0xFFFFD700),
+                                    modifier = Modifier.size(20.dp)
+                                )
+                            } else {
+                                Text(
+                                    text = "FREE",
+                                    color = Color.White,
+                                    fontWeight = FontWeight.Bold,
+                                    fontSize = MaterialTheme.typography.labelSmall.fontSize,
+                                    modifier = Modifier
+                                        .clip(RoundedCornerShape(4.dp))
+                                        .background(Color(0xFF444A65))
+                                        .padding(horizontal = 6.dp, vertical = 2.dp)
+                                )
                             }
                         }
                     },
@@ -126,7 +145,7 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                         }
                     },
                     actions = {
-                        Spacer(modifier = Modifier.width(48.dp)) // баланc справа
+                        Spacer(modifier = Modifier.width(48.dp)) // справа для симметрии
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF0A0F1C),
@@ -142,20 +161,15 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                     .padding(innerPadding)
                     .background(
                         Brush.radialGradient(
-                            colors = listOf(
-                                Color(0xFF1A1F2E),
-                                Color(0xFF0A0F1C)
-                            ),
+                            colors = listOf(Color(0xFF1A1F2E), Color(0xFF0A0F1C)),
                             radius = 1000f
                         )
                     )
             ) {
-                // неоновый эффект точек (опционально)
-                NeonParticles() // описано ниже
+                NeonParticles()
 
                 when (selectedTab) {
                     0 -> VPNCard(isPremiumUser = isPremiumUser)
-
                     1 -> AccountScreen()
                     2 -> SettingsScreen()
                     3 -> SupportScreen()

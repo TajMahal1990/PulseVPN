@@ -60,18 +60,44 @@ class MainActivity : ComponentActivity() {
     }
 }
 
-
 @Composable
 fun VPNCard(isPremiumUser: Boolean) {
     val context = LocalContext.current
 
-    /* ----- Server list ----- */
     val allServers = listOf(
-        VpnLocation("Germany", "Frankfurt", "DE", "🇩🇪", configGermany, 3, true),
-        VpnLocation("Singapore", "Singapore", "SG", "🇸🇬", configSingapore, 3, true),
-        VpnLocation("France", "Paris", "FR", "🇫🇷", configFrance, 2, false)
+        VpnLocation(
+            "Germany", "Frankfurt", "DE", "🇩🇪",
+            configGermany, 3, true,
+            ip = extractIpFromConfig(configGermany)
+        ),
+        VpnLocation(
+            "Singapore", "Singapore", "SG", "🇸🇬",
+            configSingapore, 3, isPremiumUser,
+            ip = extractIpFromConfig(configSingapore)
+        ),
+        VpnLocation(
+            "France", "Paris", "FR", "🇫🇷",
+            configFrance, 2, isPremiumUser,
+            ip = extractIpFromConfig(configFrance)
+        ),
+        VpnLocation(
+            "Netherlands", "Amsterdam", "NL", "🇳🇱",
+            configNetherlands, 3, isPremiumUser,
+            ip = extractIpFromConfig(configNetherlands)
+        ),
+        VpnLocation(
+            "Switzerland", "Zurich", "CH", "🇨🇭",
+            configSwitzerland, 3, isPremiumUser,
+            ip = extractIpFromConfig(configSwitzerland)
+        )
     )
-    val servers = if (isPremiumUser) allServers else allServers.take(1)
+
+
+    val servers = allServers.map { server ->
+        val isAvailable = isPremiumUser || server.country == "Germany"
+        server.copy(isAvailable = isAvailable)
+    }
+
 
     var selected by remember { mutableStateOf(servers[0]) }
     var showDialog by remember { mutableStateOf(false) }
@@ -82,12 +108,9 @@ fun VPNCard(isPremiumUser: Boolean) {
     val down = remember { mutableStateOf("0 KB/s") }
     val duration = remember { mutableStateOf("00:00") }
 
-    /* ----- Free‑plan limiter ----- */
-    val limiter: FreePlanLimiter = remember { FreePlanLimiter(context) }
-
-
-    /* ----- WireGuard backend ----- */
+    val limiter = remember { FreePlanLimiter(context) }
     val backend = remember { GoBackend(context) }
+
     val tunnel = remember {
         object : Tunnel {
             override fun getName() = selected.city
@@ -95,7 +118,6 @@ fun VPNCard(isPremiumUser: Boolean) {
         }
     }
 
-    /* ----- Permission launcher ----- */
     val vpnPermissionLauncher = rememberLauncherForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { res ->
@@ -107,7 +129,6 @@ fun VPNCard(isPremiumUser: Boolean) {
         } else err = "VPN permission denied"
     }
 
-    /* ----- Traffic + timer loop ----- */
     LaunchedEffect(isConnected) {
         if (isConnected) {
             var lastRx = 0L; var lastTx = 0L; var sec = 0
@@ -130,21 +151,27 @@ fun VPNCard(isPremiumUser: Boolean) {
         }
     }
 
-    /* ----- UI ----- */
-    Column(Modifier.fillMaxSize().padding(horizontal = 32.dp), horizontalAlignment = Alignment.CenterHorizontally) {
+    Column(
+        Modifier.fillMaxSize().padding(horizontal = 32.dp),
+        horizontalAlignment = Alignment.CenterHorizontally
+    ) {
         Spacer(Modifier.height(24.dp))
 
         AnimatedConnectionCircle(isConnected) {
             if (isConnected) stopVpn(backend, tunnel) { isConnected = false }
-            else if (!isPremiumUser && limiter.remaining() <= 0) err = "Free daily limit used up"
-            else {
+            else if (!isPremiumUser && limiter.remaining() <= 0) {
+                err = "Free daily limit used up"
+            } else {
                 GoBackend.VpnService.prepare(context)?.let(vpnPermissionLauncher::launch)
-                    ?: startVpn(backend, tunnel, selected.config) { isConnected = it; if (!it) err = "Failed to start VPN" }
+                    ?: startVpn(backend, tunnel, selected.config) {
+                        isConnected = it
+                        if (!it) err = "Failed to start VPN"
+                    }
             }
         }
 
         Spacer(Modifier.height(24.dp))
-        LocationCard(selected)
+        LocationCard(location = selected, onClick = { showDialog = true })
         Spacer(Modifier.height(16.dp))
 
         Text("↑ ${up.value}   ↓ ${down.value}", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFB0BEC5))
@@ -169,24 +196,20 @@ fun VPNCard(isPremiumUser: Boolean) {
             }
         }
 
-        Spacer(Modifier.height(32.dp))
-        Box(
-            Modifier.height(48.dp).width(200.dp).clip(RoundedCornerShape(16.dp))
-                .background(Brush.horizontalGradient(listOf(Color(0xFF00FFC8), Color(0xFF0078A0))))
-                .clickable { showDialog = true }, contentAlignment = Alignment.Center
-        ) {
-            Row(verticalAlignment = Alignment.CenterVertically) {
-                Icon(Icons.Default.Person, contentDescription = null, tint = Color.Black)
-                Spacer(Modifier.width(8.dp))
-                Text("Change Server", style = MaterialTheme.typography.labelLarge, color = Color.Black)
-            }
-        }
-
         if (showDialog) {
-            ServerDialog(servers, { selected = it; showDialog = false }, { showDialog = false })
+            ServerDialog(
+                locations = servers,
+                isPremiumUser = isPremiumUser, // ← вот этого не хватало
+                onSelect = { selected = it; showDialog = false },
+                onDismiss = { showDialog = false }
+            )
         }
 
-        err?.let { Spacer(Modifier.height(12.dp)); Text(it, color = MaterialTheme.colorScheme.error) }
+
+        err?.let {
+            Spacer(Modifier.height(12.dp))
+            Text(it, color = MaterialTheme.colorScheme.error)
+        }
     }
 }
 
@@ -201,8 +224,8 @@ data class VpnLocation(
     val flag: String,
     val config: String,
     val signalLevel: Int,
-    val isAvailable: Boolean
-)
+    val isAvailable: Boolean,
+    val ip: String )
 
 val configGermany = """[Interface]
 PrivateKey = eMTgL1HBd3TC/GHSOhCDFyPHlyA/4KjmftZNwAI9dVI=
@@ -217,6 +240,26 @@ AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
 
 val configSingapore = """[Interface]\nPrivateKey=...\nAddress=...\nDNS=1.1.1.1\n[Peer]\nPublicKey=...\nEndpoint=...\nAllowedIPs=0.0.0.0/0,::/0"""
 val configFrance = configSingapore
+
+val configNetherlands = """[Interface]
+PrivateKey = ...
+Address = ...
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = ...
+Endpoint = 95.179.220.55:51820
+AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
+
+val configSwitzerland = """[Interface]
+PrivateKey = ...
+Address = ...
+DNS = 1.1.1.1
+
+[Peer]
+PublicKey = ...
+Endpoint = 185.104.185.59:51820
+AllowedIPs = 0.0.0.0/0,::/0""".trimIndent()
 
 fun startVpn(backend: GoBackend, tunnel: Tunnel, cfg: String, cb: (Boolean) -> Unit) {
     CoroutineScope(Dispatchers.Main).launch {
@@ -238,3 +281,9 @@ fun formatSpeed(bps: Long): String {
 }
 
 fun formatDuration(s: Int): String = "%02d:%02d".format(s / 60, s % 60)
+
+
+fun extractIpFromConfig(config: String): String {
+    val endpointLine = config.lines().find { it.trim().startsWith("Endpoint") }
+    return endpointLine?.substringAfter("=")?.substringBefore(":")?.trim() ?: "N/A"
+}

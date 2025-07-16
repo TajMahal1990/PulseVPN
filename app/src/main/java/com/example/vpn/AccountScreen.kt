@@ -26,18 +26,38 @@ import androidx.compose.foundation.rememberScrollState
 import androidx.compose.ui.text.style.TextAlign
 
 
+import android.app.Activity
+
+import androidx.compose.ui.platform.LocalContext
+
+import com.android.billingclient.api.*
+import com.example.vpn.payment.BillingManager
+
 @Composable
 fun AccountScreen() {
-    /* ─── выбранный план ─── */
-    var selectedPlan by remember { mutableStateOf("month") }   // "month" | "year"
+    var selectedPlan by remember { mutableStateOf("month") }
+    val context = LocalContext.current
+    val billingManager = remember {
+        BillingManager(
+            context = context,
+            onPremiumActive = { /* TODO: Handle premium state */ },
+            onError = { it.printStackTrace() }
+        )
+    }
+    val activity = context as? Activity
+    var productDetails by remember { mutableStateOf<List<ProductDetails>>(emptyList()) }
 
-    /* ─── текст на кнопке ─── */
-    val buttonText = if (selectedPlan == "year")
-        "Try for 0.00"               // бесплатный три-ал для годового
-    else
-        "$7.99 / month"
+    LaunchedEffect(Unit) {
+        billingManager.startConnection()
+        billingManager.queryProductDetails("monthly_sub") { monthly ->
+            billingManager.queryProductDetails("yearly_sub") { yearly ->
+                productDetails = monthly + yearly
+            }
+        }
+    }
 
-    /* ─── UI ─── */
+    val buttonText = if (selectedPlan == "year") "Try for 0.00" else "$7.99 / month"
+
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -46,170 +66,78 @@ fun AccountScreen() {
             .padding(24.dp),
         horizontalAlignment = Alignment.CenterHorizontally
     ) {
-
-        /* ---------- Заголовок ---------- */
-        Text(
-            "Premium Features",
-            style  = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp),
-            color  = Color.White
-        )
-
+        Text("Premium Features", style = MaterialTheme.typography.titleLarge.copy(fontSize = 28.sp), color = Color.White)
         Spacer(Modifier.height(24.dp))
-
-        /* ---------- Таблица преимуществ ---------- */
         Text("What’s included", color = Color.White, fontSize = 20.sp, fontWeight = FontWeight.SemiBold)
         Spacer(Modifier.height(8.dp))
 
-        /* шапка Free / Premium */
-        Row(
-            modifier = Modifier
-                .fillMaxWidth()
-                .padding(horizontal = 16.dp),
-            verticalAlignment = Alignment.CenterVertically
-        ) {
-            Text("", modifier = Modifier.weight(1f))   // пустая колонка под описание
-            Text("Free",    color = Color.Gray,       modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
-            Text("Premium", color = Color(0xFF00FFC8),modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+        Row(Modifier.fillMaxWidth().padding(horizontal = 16.dp), verticalAlignment = Alignment.CenterVertically) {
+            Text("", modifier = Modifier.weight(1f))
+            Text("Free", color = Color.Gray, modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
+            Text("Premium", color = Color(0xFF00FFC8), modifier = Modifier.weight(1f), textAlign = TextAlign.Center)
         }
 
         Spacer(Modifier.height(8.dp))
 
-        ComparisonRow("🌍 Locations",          "Germany only", "All countries")
-        ComparisonRow("⚡ Speed",              "Limited (5 Mbps)", "Unlimited")
-        ComparisonRow("🔒 Encryption",         "Standard", "Military-grade")
-        ComparisonRow("🤖 Support",            "Email only", "Personal assistant")
-        ComparisonRow("⏱ Daily time limit",   "15 min/day", "Unlimited")
+        ComparisonRow("🌍 Locations", "Germany only", "All countries")
+        ComparisonRow("⚡ Speed", "Limited (5 Mbps)", "Unlimited")
+        ComparisonRow("🔒 Encryption", "Standard", "Military-grade")
+        ComparisonRow("🤖 Support", "Email only", "Personal assistant")
+        ComparisonRow("⏱ Daily time limit", "15 min/day", "Unlimited")
 
-        /* ---------- Разделитель ---------- */
         Spacer(Modifier.height(36.dp))
         Divider(color = Color.DarkGray.copy(alpha = 0.5f))
         Spacer(Modifier.height(36.dp))
 
-        /* ---------- Выбор плана ---------- */
         Text("Choose your plan", color = Color.White, fontWeight = FontWeight.SemiBold, fontSize = 20.sp)
         Spacer(Modifier.height(16.dp))
 
-        PlanOption(
-            title     = "1-Year Plan",
-            subPrice  = "$3.25 / month billed yearly",
-            trialText = "3-day free trial, then \$39.00 / year",
-            tag       = "Most popular",
-            selected  = selectedPlan == "year",
-            onClick   = { selectedPlan = "year" }
-        )
-
+        PlanOption("1-Year Plan", "$3.25 / month billed yearly", "3-day free trial, then \$39.00 / year", "Most popular", selectedPlan == "year") { selectedPlan = "year" }
         Spacer(Modifier.height(16.dp))
+        PlanOption("1-Month Plan", "$7.99 / month", "", null, selectedPlan == "month") { selectedPlan = "month" }
 
-        PlanOption(
-            title     = "1-Month Plan",
-            subPrice  = "$7.99 / month",
-            trialText = "",                                      // без trial-текста
-            tag       = null,
-            selected  = selectedPlan == "month",
-            onClick   = { selectedPlan = "month" }
-        )
-
-        /* ---------- Кнопка покупки ---------- */
         Spacer(Modifier.height(36.dp))
-
         Button(
-            onClick = { /* TODO: launch purchase flow */ },
-            colors  = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
-            modifier = Modifier
-                .fillMaxWidth()
-                .height(54.dp)
-                .clip(RoundedCornerShape(16.dp))
+            onClick = {
+                val productId = if (selectedPlan == "month") "monthly_sub" else "yearly_sub"
+                val product = productDetails.find { it.productId == productId }
+                if (product != null && activity != null) {
+                    billingManager.launchPurchaseFlow(activity, product)
+                }
+            },
+            colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF00FFC8)),
+            modifier = Modifier.fillMaxWidth().height(54.dp).clip(RoundedCornerShape(16.dp))
         ) {
-            Text(
-                text      = buttonText,
-                color     = Color.Black,
-                fontSize  = 17.sp,
-                fontWeight = FontWeight.Bold
-            )
+            Text(buttonText, color = Color.Black, fontSize = 17.sp, fontWeight = FontWeight.Bold)
         }
 
-        /* ---------- футер ---------- */
         Spacer(Modifier.height(36.dp))
         Text("App version: 1.0.0", color = Color.Gray, fontSize = 12.sp)
         Spacer(Modifier.height(12.dp))
     }
 }
+
 @Composable
-fun PlanOption(
-    title: String,              // "1-Year Plan" или "1-Month Plan"
-    subPrice: String,           // "$3.25/mo billed yearly" или "$7.99/mo"
-    trialText: String,          // "3-day free trial, then $39.00/year"
-    tag: String?,               // "Most popular" или null
-    selected: Boolean,
-    onClick: () -> Unit
-) {
-    val border = if (selected)
-        Modifier.border(2.dp, Color(0xFF00FFC8), RoundedCornerShape(18.dp))
-    else Modifier
-
+fun PlanOption(title: String, subPrice: String, trialText: String, tag: String?, selected: Boolean, onClick: () -> Unit) {
+    val border = if (selected) Modifier.border(2.dp, Color(0xFF00FFC8), RoundedCornerShape(18.dp)) else Modifier
     Column(
-        modifier = Modifier
-            .fillMaxWidth()
-            .then(border)
-            .clip(RoundedCornerShape(18.dp))
-            .background(Color(0xFF101624)) // тёмный фон
-            .clickable { onClick() }
-            .padding(vertical = 20.dp, horizontal = 16.dp)
+        modifier = Modifier.fillMaxWidth().then(border).clip(RoundedCornerShape(18.dp)).background(Color(0xFF101624)).clickable { onClick() }.padding(20.dp)
     ) {
-        Row(
-            verticalAlignment = Alignment.CenterVertically,
-            modifier = Modifier.fillMaxWidth()
-        ) {
-            RadioButton(
-                selected = selected,
-                onClick = onClick,
-                colors = RadioButtonDefaults.colors(
-                    selectedColor = Color(0xFF00FFC8),
-                    unselectedColor = Color.White.copy(alpha = 0.5f)
-                )
-            )
-
+        Row(verticalAlignment = Alignment.CenterVertically, modifier = Modifier.fillMaxWidth()) {
+            RadioButton(selected = selected, onClick = onClick, colors = RadioButtonDefaults.colors(selectedColor = Color(0xFF00FFC8), unselectedColor = Color.White.copy(alpha = 0.5f)))
             Spacer(modifier = Modifier.width(12.dp))
-
             Column(modifier = Modifier.weight(1f)) {
-                Text(
-                    text = title,
-                    color = Color.White,
-                    fontWeight = FontWeight.Bold,
-                    fontSize = 18.sp
-                )
-
+                Text(title, color = Color.White, fontWeight = FontWeight.Bold, fontSize = 18.sp)
                 Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = subPrice,
-                    color = Color(0xFF00FFC8),
-                    fontSize = 15.sp,
-                    fontWeight = FontWeight.SemiBold
-                )
-
-                Spacer(modifier = Modifier.height(4.dp))
-
-                Text(
-                    text = trialText,
-                    color = Color.Gray,
-                    fontSize = 13.sp
-                )
+                Text(subPrice, color = Color(0xFF00FFC8), fontSize = 15.sp, fontWeight = FontWeight.SemiBold)
+                if (trialText.isNotBlank()) {
+                    Spacer(modifier = Modifier.height(4.dp))
+                    Text(trialText, color = Color.Gray, fontSize = 13.sp)
+                }
             }
-
             if (!tag.isNullOrBlank()) {
-                Box(
-                    modifier = Modifier
-                        .clip(RoundedCornerShape(8.dp))
-                        .background(Color(0xFF00FFC8).copy(alpha = 0.15f))
-                        .padding(horizontal = 10.dp, vertical = 4.dp)
-                ) {
-                    Text(
-                        text = tag,
-                        fontSize = 12.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = Color(0xFF00FFC8)
-                    )
+                Box(modifier = Modifier.clip(RoundedCornerShape(8.dp)).background(Color(0xFF00FFC8).copy(alpha = 0.15f)).padding(horizontal = 10.dp, vertical = 4.dp)) {
+                    Text(tag, fontSize = 12.sp, fontWeight = FontWeight.SemiBold, color = Color(0xFF00FFC8))
                 }
             }
         }
@@ -217,42 +145,11 @@ fun PlanOption(
 }
 
 @Composable
-fun ComparisonRow(
-    feature: String,
-    basicValue: String,     // пример: "15 min/day"
-    premiumValue: String    // пример: "Unlimited"
-) {
-    Row(
-        modifier = Modifier
-            .fillMaxWidth()
-            .padding(vertical = 10.dp),
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        // Название фичи
-        Text(
-            text = feature,
-            color = Color.White,
-            fontSize = 15.sp,
-            modifier = Modifier.weight(1.5f)
-        )
-
-        // Значение для Basic
-        Text(
-            text = basicValue,
-            color = Color.Gray,
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
-
-        // Значение для Premium
-        Text(
-            text = premiumValue,
-            color = Color(0xFF00FFC8),
-            fontSize = 14.sp,
-            textAlign = TextAlign.Center,
-            modifier = Modifier.weight(1f)
-        )
+fun ComparisonRow(feature: String, basicValue: String, premiumValue: String) {
+    Row(modifier = Modifier.fillMaxWidth().padding(vertical = 10.dp), verticalAlignment = Alignment.CenterVertically) {
+        Text(feature, color = Color.White, fontSize = 15.sp, modifier = Modifier.weight(1.5f))
+        Text(basicValue, color = Color.Gray, fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
+        Text(premiumValue, color = Color(0xFF00FFC8), fontSize = 14.sp, textAlign = TextAlign.Center, modifier = Modifier.weight(1f))
     }
 }
 

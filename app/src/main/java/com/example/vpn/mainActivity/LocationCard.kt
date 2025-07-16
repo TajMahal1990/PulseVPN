@@ -14,22 +14,53 @@ import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.foundation.clickable
+import androidx.compose.material3.MaterialTheme
+
+
 import com.example.vpn.VpnLocation
 
 
 @Composable
-fun LocationCard(location: VpnLocation) {
-    Row(
-        modifier = Modifier.fillMaxWidth().clip(RoundedCornerShape(16.dp)).background(Color(0xFF11182A)).padding(16.dp),
-        verticalAlignment = Alignment.CenterVertically
+fun LocationCard(location: VpnLocation, onClick: () -> Unit) {
+    Box(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clip(RoundedCornerShape(12.dp))
+            .background(Color(0xFF12172B))
+            .clickable { onClick() }
+            .padding(16.dp)
     ) {
-        FlagEmoji(location.code)
-        Spacer(modifier = Modifier.width(12.dp))
-        Column {
-            Text("${location.city}, ${location.country}", color = Color.White, fontSize = 14.sp)
-            Text("IP: 145.66.32.1", color = Color(0xFFB0BEC5), fontSize = 12.sp)
+        Row(
+            modifier = Modifier.fillMaxWidth(),
+            horizontalArrangement = Arrangement.SpaceBetween,
+            verticalAlignment = Alignment.CenterVertically
+        ) {
+            Row(verticalAlignment = Alignment.CenterVertically) {
+                Text(
+                    text = location.flag,
+                    fontSize = 24.sp
+                )
+                Spacer(modifier = Modifier.width(12.dp))
+                Column {
+                    Text(
+                        text = "${location.city}, ${location.country}",
+                        color = Color.White,
+                        style = MaterialTheme.typography.bodyLarge
+                    )
+                    Text(
+                        text = "IP: ${location.ip}",  // ← используем ip из модели
+                        color = Color.Gray,
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                }
+            }
+
+            Icon(
+                imageVector = Icons.Default.Lock,
+                contentDescription = null,
+                tint = Color(0xFF00FFC8)
+            )
         }
-        Spacer(modifier = Modifier.weight(1f))
-        Icon(Icons.Default.Lock, contentDescription = null, tint = Color(0xFF00FFC8), modifier = Modifier.size(24.dp))
     }
 }

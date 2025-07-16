@@ -6,7 +6,6 @@ import android.app.Activity
 import android.content.Context
 import com.android.billingclient.api.*
 
-/*
 
 class BillingManager(
     private val context: Context,
@@ -14,13 +13,11 @@ class BillingManager(
     private val onError: (Throwable) -> Unit
 ) : PurchasesUpdatedListener {
 
-    /* 1. enablePendingPurchases(...) требует объект параметров */
     private val billingClient = BillingClient.newBuilder(context)
-        .enablePendingPurchases(
-            PendingPurchasesParams.newBuilder().build()
-        )
+        .enablePendingPurchases(PendingPurchasesParams.newBuilder().build()) // ← обязательно!
         .setListener(this)
         .build()
+
 
     /* ───────── подключение ───────── */
     fun startConnection() {
@@ -64,9 +61,11 @@ class BillingManager(
     /* ───────── callback покупки ───────── */
     override fun onPurchasesUpdated(r: BillingResult, purchases: MutableList<Purchase>?) {
         if (r.responseCode == BillingClient.BillingResponseCode.OK && purchases != null) {
-            purchases.forEach { p -> if (p.purchaseState == Purchase.PurchaseState.PURCHASED) {
-                if (!p.isAcknowledged) acknowledge(p) else onPremiumActive()
-            }}
+            purchases.forEach { p ->
+                if (p.purchaseState == Purchase.PurchaseState.PURCHASED) {
+                    if (!p.isAcknowledged) acknowledge(p) else onPremiumActive()
+                }
+            }
         } else if (r.responseCode != BillingClient.BillingResponseCode.USER_CANCELED) {
             onError(Exception("Purchase error: ${r.debugMessage}"))
         }
@@ -96,8 +95,8 @@ class BillingManager(
             ).build()
 
 
-    fun endConnection() = billingClient.endConnection()
+        fun endConnection() = billingClient.endConnection()
+    }
 }
 
 
- */

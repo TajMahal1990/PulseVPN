@@ -1,6 +1,7 @@
 package com.example.vpn.mainActivity
 
 
+/*
 data class VpnServer(
     val country: String,        // Название страны (например, "Germany")
     val city: String,           // Город (например, "Frankfurt")
@@ -9,3 +10,5 @@ data class VpnServer(
     val isAvailable: Boolean,   // Доступен ли сервер (для блокировки)
     val config: String          // WireGuard-конфиг
 )
+
+ */
