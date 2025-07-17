@@ -41,6 +41,7 @@ import kotlinx.coroutines.*
 import java.io.BufferedReader
 import java.io.StringReader
 import java.util.concurrent.TimeUnit
+import androidx.compose.ui.res.stringResource
 
 
 
@@ -54,7 +55,7 @@ class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContent {
-            val isPremiumUser by rememberSaveable { mutableStateOf(false) }
+            val isPremiumUser by rememberSaveable { mutableStateOf(true) }
             VPNAppWithDrawer(isPremiumUser = isPremiumUser)
         }
     }
@@ -66,28 +67,33 @@ fun VPNCard(isPremiumUser: Boolean) {
 
     val allServers = listOf(
         VpnLocation(
-            "Germany", "Frankfurt", "DE", "🇩🇪",
-            configGermany, 3, true,
+            context.getString(R.string.country_germany),
+            context.getString(R.string.city_frankfurt),
+            "DE", "🇩🇪", configGermany, 3, true,
             ip = extractIpFromConfig(configGermany)
         ),
         VpnLocation(
-            "Singapore", "Singapore", "SG", "🇸🇬",
-            configSingapore, 3, isPremiumUser,
+            context.getString(R.string.country_singapore),
+            context.getString(R.string.city_singapore),
+            "SG", "🇸🇬", configSingapore, 3, isPremiumUser,
             ip = extractIpFromConfig(configSingapore)
         ),
         VpnLocation(
-            "France", "Paris", "FR", "🇫🇷",
-            configFrance, 2, isPremiumUser,
+            context.getString(R.string.country_france),
+            context.getString(R.string.city_paris),
+            "FR", "🇫🇷", configFrance, 2, isPremiumUser,
             ip = extractIpFromConfig(configFrance)
         ),
         VpnLocation(
-            "Netherlands", "Amsterdam", "NL", "🇳🇱",
-            configNetherlands, 3, isPremiumUser,
+            context.getString(R.string.country_netherlands),
+            context.getString(R.string.city_amsterdam),
+            "NL", "🇳🇱", configNetherlands, 3, isPremiumUser,
             ip = extractIpFromConfig(configNetherlands)
         ),
         VpnLocation(
-            "Switzerland", "Zurich", "CH", "🇨🇭",
-            configSwitzerland, 3, isPremiumUser,
+            context.getString(R.string.country_switzerland),
+            context.getString(R.string.city_zurich),
+            "CH", "🇨🇭", configSwitzerland, 3, isPremiumUser,
             ip = extractIpFromConfig(configSwitzerland)
         )
     )
@@ -97,7 +103,6 @@ fun VPNCard(isPremiumUser: Boolean) {
         val isAvailable = isPremiumUser || server.country == "Germany"
         server.copy(isAvailable = isAvailable)
     }
-
 
     var selected by remember { mutableStateOf(servers[0]) }
     var showDialog by remember { mutableStateOf(false) }
@@ -124,9 +129,9 @@ fun VPNCard(isPremiumUser: Boolean) {
         if (res.resultCode == Activity.RESULT_OK) {
             startVpn(backend, tunnel, selected.config) {
                 isConnected = it
-                if (!it) err = "Failed to start VPN"
+                if (!it) err = context.getString(R.string.failed_to_start_vpn)
             }
-        } else err = "VPN permission denied"
+        } else err = context.getString(R.string.vpn_permission_denied)
     }
 
     LaunchedEffect(isConnected) {
@@ -160,12 +165,12 @@ fun VPNCard(isPremiumUser: Boolean) {
         AnimatedConnectionCircle(isConnected) {
             if (isConnected) stopVpn(backend, tunnel) { isConnected = false }
             else if (!isPremiumUser && limiter.remaining() <= 0) {
-                err = "Free daily limit used up"
+                err = context.getString(R.string.free_daily_limit_used_up)
             } else {
                 GoBackend.VpnService.prepare(context)?.let(vpnPermissionLauncher::launch)
                     ?: startVpn(backend, tunnel, selected.config) {
                         isConnected = it
-                        if (!it) err = "Failed to start VPN"
+                        if (!it) err = context.getString(R.string.failed_to_start_vpn)
                     }
             }
         }
@@ -175,18 +180,22 @@ fun VPNCard(isPremiumUser: Boolean) {
         Spacer(Modifier.height(16.dp))
 
         Text("↑ ${up.value}   ↓ ${down.value}", style = MaterialTheme.typography.bodyLarge, color = Color(0xFFB0BEC5))
-        Text("Connected: ${duration.value}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFB0BEC5))
+        Text("${stringResource(R.string.connected)}: ${duration.value}", style = MaterialTheme.typography.bodySmall, color = Color(0xFFB0BEC5))
 
         if (!isPremiumUser) {
             Spacer(Modifier.height(16.dp))
             Column(
-                Modifier.fillMaxWidth().clip(RoundedCornerShape(12.dp)).background(Color(0xFF2A2E3E)).padding(12.dp)
+                Modifier
+                    .fillMaxWidth()
+                    .clip(RoundedCornerShape(12.dp))
+                    .background(Color(0xFF2A2E3E))
+                    .padding(12.dp)
             ) {
-                Text("🔒 Free plan enabled", color = Color(0xFFFFA726), style = MaterialTheme.typography.bodyLarge)
-                Text("Germany only · 200 KB/s · 15 min/day", color = Color.Gray, style = MaterialTheme.typography.bodySmall)
+                Text(stringResource(R.string.lock_free_plan_enabled), color = Color(0xFFFFA726), style = MaterialTheme.typography.bodyLarge)
+                Text(stringResource(R.string.germany_only__200_kb_s__15_min_day), color = Color.Gray, style = MaterialTheme.typography.bodySmall)
                 Spacer(Modifier.height(6.dp))
                 Row(verticalAlignment = Alignment.CenterVertically) {
-                    Text("⏳ Remaining time: ", color = Color.White, style = MaterialTheme.typography.bodyMedium)
+                    Text(stringResource(R.string.hourglass_remaining_time), color = Color.White, style = MaterialTheme.typography.bodyMedium)
                     Text(
                         formatDuration(limiter.remaining()),
                         color = if (limiter.remaining() <= 60) Color.Red else Color(0xFF00FFC8),
@@ -199,12 +208,11 @@ fun VPNCard(isPremiumUser: Boolean) {
         if (showDialog) {
             ServerDialog(
                 locations = servers,
-                isPremiumUser = isPremiumUser, // ← вот этого не хватало
+                isPremiumUser = isPremiumUser,
                 onSelect = { selected = it; showDialog = false },
                 onDismiss = { showDialog = false }
             )
         }
-
 
         err?.let {
             Spacer(Modifier.height(12.dp))
@@ -212,7 +220,6 @@ fun VPNCard(isPremiumUser: Boolean) {
         }
     }
 }
-
 
 
 /* =============== HELPERS =============== */

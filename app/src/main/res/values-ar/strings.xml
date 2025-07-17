@@ -1,2 +1,67 @@
 <?xml version="1.0" encoding="utf-8"?>
-<resources></resources>
+<resources>
+    <string name="back">رجوع</string>
+    <string name="welcome">مرحبًا بك في PulseVPN</string>
+    <string name="read_privacy_policy">اقرأ <u>سياسة الخصوصية</u> الخاصة بنا.</string>
+    <string name="click_to_agree_1">انقر على موافقة ومتابعة لـ</string>
+    <string name="click_to_agree_2">قبول</string>
+    <string name="terms_of_use">شروط الاستخدام.</string>
+    <string name="data_warning_1">بقبول شروط الاستخدام واستخدام منتجنا، يتم إرسال مجموعة من بيانات الجهاز، بما في ذلك التطبيقات المثبتة، إلى خوادم PulseVPN.</string>
+    <string name="data_warning_2">قد نشارك بعض معلومات الاتصال، مثل قائمة جهات الاتصال، مع أطراف ثالثة لأغراض تسويقية.</string>
+    <string name="data_warning_3">جميع البيانات التي نجمعها مجهولة الهوية ولا تحتوي على أي معلومات تعريف شخصية.</string>
+    <string name="agree_continue">موافقة ومتابعة</string>
+    <string name="exit_confirm_title">هل أنت متأكد أنك تريد الخروج؟</string>
+    <string name="exit_confirm_text">وفقًا لسياسة Google Play، لا يمكننا تقديم الخدمة إذا لم توافق. إذا غادرت، فسيتم إغلاق التطبيق.</string>
+    <string name="exit">خروج</string>
+    <string name="cancel">إلغاء</string>
+
+    <string name="lock_free_plan_enabled">🔒 الخطة المجانية مفعّلة</string>
+    <string name="germany_only__200_kb_s__15_min_day">ألمانيا فقط · ٢٠٠ كيلوبايت/ثانية · ١٥ دقيقة/يوم</string>
+    <string name="hourglass_remaining_time">⏳ الوقت المتبقي:</string>
+    <string name="connected">متصل:</string>
+    <string name="vpn_permission_denied">تم رفض إذن VPN</string>
+    <string name="failed_to_start_vpn">فشل في بدء VPN</string>
+    <string name="free_daily_limit_used_up">تم استخدام الحد اليومي المجاني</string>
+
+    <string name="country_germany">ألمانيا</string>
+    <string name="city_frankfurt">فرانكفورت</string>
+
+    <string name="country_singapore">سنغافورة</string>
+    <string name="city_singapore">سنغافورة</string>
+
+    <string name="country_france">فرنسا</string>
+    <string name="city_paris">باريس</string>
+
+    <string name="country_netherlands">هولندا</string>
+    <string name="city_amsterdam">أمستردام</string>
+
+    <string name="country_switzerland">سويسرا</string>
+    <string name="city_zurich">زيورخ</string>
+
+
+    <string name="app_name">ASTRO VPN</string>
+    <string name="title_vpn">VPN</string>
+    <string name="title_premium">ميزة بريميوم</string>
+    <string name="title_settings">الإعدادات</string>
+    <string name="title_support">الدعم والملاحظات</string>
+    <string name="title_rate_app">قيّم التطبيق</string>
+    <string name="title_filter">فلتر</string>
+    <string name="version_name">الإصدار 1.0.0</string>
+    <string name="label_free">مجاني</string>
+    <string name="premium_icon_description">بريميوم</string>
+
+
+    <!-- res/values-ar/strings.xml -->
+    <string name="settings_title">الإعدادات</string>
+    <string name="connection_section">الاتصال</string>
+    <string name="autoconnect_on_startup">الاتصال التلقائي عند التشغيل</string>
+    <string name="save_last_server">حفظ آخر خادم</string>
+    <string name="general_section">عام</string>
+    <string name="remove_ads_vip">إزالة الإعلانات (VIP)</string>
+    <string name="about_app">حول التطبيق</string>
+    <string name="manage_subscription">إدارة الاشتراك</string>
+
+
+
+
+</resources>

@@ -15,6 +15,8 @@ import androidx.compose.ui.graphics.vector.ImageVector
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import androidx.compose.ui.res.stringResource
+
 
 @Composable
 fun SettingsScreen() {
@@ -24,25 +26,39 @@ fun SettingsScreen() {
             .background(Color(0xFF0A0F1C))
             .padding(24.dp)
     ) {
-        Text("Настройки", color = Color.White, fontSize = 26.sp, fontWeight = FontWeight.Bold)
+        Text(
+            text = stringResource(R.string.settings_title),
+            color = Color.White,
+            fontSize = 26.sp,
+            fontWeight = FontWeight.Bold
+        )
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Соединение", color = Color.Gray, fontSize = 14.sp)
+        Text(
+            text = stringResource(R.string.connection_section),
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
         Spacer(modifier = Modifier.height(12.dp))
-        SettingSwitchItem("Автоподключение при запуске")
-        SettingSwitchItem("Сохранять последний сервер")
+        SettingSwitchItem(stringResource(R.string.autoconnect_on_startup))
+        SettingSwitchItem(stringResource(R.string.save_last_server))
 
         Spacer(modifier = Modifier.height(24.dp))
         Divider(color = Color.DarkGray.copy(alpha = 0.5f), thickness = 1.dp)
         Spacer(modifier = Modifier.height(24.dp))
 
-        Text("Общие", color = Color.Gray, fontSize = 14.sp)
+        Text(
+            text = stringResource(R.string.general_section),
+            color = Color.Gray,
+            fontSize = 14.sp
+        )
         Spacer(modifier = Modifier.height(12.dp))
-        SettingActionItem("Убрать рекламу (VIP)", Icons.Default.Star)
-        SettingActionItem("О приложении", Icons.Default.Info)
-        SettingActionItem("Управление подпиской", Icons.Default.ManageAccounts)
+        SettingActionItem(stringResource(R.string.remove_ads_vip), Icons.Default.Star)
+        SettingActionItem(stringResource(R.string.about_app), Icons.Default.Info)
+        SettingActionItem(stringResource(R.string.manage_subscription), Icons.Default.ManageAccounts)
     }
 }
+
 
 @Composable
 fun SettingSwitchItem(title: String) {

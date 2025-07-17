@@ -1,3 +1,64 @@
 <resources>
-    <string name="PulseVPN">PulseVPN</string>
+    <string name="AstroVPN" translatable="false">AstroVPN</string>
+    <string name="back">Back</string>
+    <string name="welcome">Welcome to PulseVPN</string>
+    <string name="read_privacy_policy">Read our <u>Privacy Policy.</u></string>
+    <string name="click_to_agree_1">Click Agree &amp; Continue to</string>
+    <string name="click_to_agree_2">accept</string>
+    <string name="terms_of_use">Terms of Use.</string>
+    <string name="data_warning_1">By accepting the Terms of Use and using our product, a set of device data, including installed apps, is sent to PulseVPN servers.</string>
+    <string name="data_warning_2">We may share some contact data, like contact list, with third parties for marketing purposes.</string>
+    <string name="data_warning_3">All data we collect is anonymous and does not include any personal identifying information.</string>
+    <string name="agree_continue">Agree &amp; Continue</string>
+    <string name="exit_confirm_title">Are you sure you want to exit?</string>
+    <string name="exit_confirm_text">As per Google Play policy, we can\'t provide service if you do not consent. If you leave, the app will be closed.</string>
+    <string name="exit">Exit</string>
+    <string name="cancel">Cancel</string>
+
+    <string name="lock_free_plan_enabled" >🔒 Free plan enabled</string>
+    <string name="germany_only__200_kb_s__15_min_day">Germany only · 200 KB/s · 15 min/day</string>
+    <string name="hourglass_remaining_time">⏳ Remaining time:</string>
+    <string name="connected">Connected:</string>
+    <string name="vpn_permission_denied">VPN permission denied</string>
+    <string name="failed_to_start_vpn">Failed to start VPN</string>
+    <string name="free_daily_limit_used_up">Free daily limit used up</string>
+
+    <string name="country_germany">Germany</string>
+    <string name="city_frankfurt">Frankfurt</string>
+
+    <string name="country_singapore">Singapore</string>
+    <string name="city_singapore">Singapore</string>
+
+    <string name="country_france">France</string>
+    <string name="city_paris">Paris</string>
+
+    <string name="country_netherlands">Netherlands</string>
+    <string name="city_amsterdam">Amsterdam</string>
+
+    <string name="country_switzerland">Switzerland</string>
+    <string name="city_zurich">Zurich</string>
+
+
+    <string name="app_name">ASTRO VPN</string>
+    <string name="title_vpn">VPN</string>
+    <string name="title_premium">Premium Feature</string>
+    <string name="title_settings">Settings</string>
+    <string name="title_support">Feedback &amp; Support</string>
+    <string name="title_rate_app">Rate App</string>
+    <string name="title_filter">Filter</string>
+    <string name="version_name">v1.0.0</string>
+    <string name="label_free">FREE</string>
+    <string name="premium_icon_description">Premium</string>
+
+
+    <string name="settings_title">Settings</string>
+    <string name="connection_section">Connection</string>
+    <string name="autoconnect_on_startup">Auto-connect on launch</string>
+    <string name="save_last_server">Save last server</string>
+    <string name="general_section">General</string>
+    <string name="remove_ads_vip">Remove ads (VIP)</string>
+    <string name="about_app">About app</string>
+    <string name="manage_subscription">Manage subscription</string>
+
+
 </resources>

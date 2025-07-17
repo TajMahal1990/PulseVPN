@@ -11,6 +11,9 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.*
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
+import androidx.compose.ui.platform.LocalContext
+import androidx.compose.ui.res.stringResource
+
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
@@ -33,6 +36,19 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
     val scope = rememberCoroutineScope()
     var selectedTab by remember { mutableStateOf(0) }
 
+    val context = LocalContext.current
+
+    val titleVpn = stringResource(R.string.title_vpn)
+    val titlePremium = stringResource(R.string.title_premium)
+    val titleSettings = stringResource(R.string.title_settings)
+    val titleSupport = stringResource(R.string.title_support)
+    val titleRateApp = stringResource(R.string.title_rate_app)
+    val titleFilter = stringResource(R.string.title_filter)
+    val versionName = stringResource(R.string.version_name)
+    val labelFree = stringResource(R.string.label_free)
+    val premiumIconDesc = stringResource(R.string.premium_icon_description)
+    val appNameParts = stringResource(R.string.app_name).split(" ")
+
     ModalNavigationDrawer(
         drawerState = drawerState,
         drawerContent = {
@@ -50,13 +66,13 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                         verticalAlignment = Alignment.CenterVertically
                     ) {
                         Text(
-                            text = "ASTRO",
+                            text = appNameParts.getOrElse(0) { "ASTRO" },
                             color = Color.White,
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineSmall
                         )
                         Text(
-                            text = "VPN",
+                            text = appNameParts.getOrElse(1) { "VPN" },
                             color = Color(0xFF00FFC8),
                             fontWeight = FontWeight.Bold,
                             style = MaterialTheme.typography.headlineSmall
@@ -67,28 +83,28 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                     Divider(color = Color(0xFF444A65), thickness = 1.dp)
                     Spacer(modifier = Modifier.height(12.dp))
 
-                    DrawerItem("VPN", Icons.Default.Lock, selectedTab == 0) {
+                    DrawerItem(titleVpn, Icons.Default.Lock, selectedTab == 0) {
                         selectedTab = 0; scope.launch { drawerState.close() }
                     }
-                    DrawerItem("Premium-функция", Icons.Default.Star, selectedTab == 1) {
+                    DrawerItem(titlePremium, Icons.Default.Star, selectedTab == 1) {
                         selectedTab = 1; scope.launch { drawerState.close() }
                     }
-                    DrawerItem("Настройки", Icons.Default.Settings, selectedTab == 2) {
+                    DrawerItem(titleSettings, Icons.Default.Settings, selectedTab == 2) {
                         selectedTab = 2; scope.launch { drawerState.close() }
                     }
-                    DrawerItem("Отзывы и поддержка", Icons.Default.Chat, selectedTab == 3) {
+                    DrawerItem(titleSupport, Icons.Default.Chat, selectedTab == 3) {
                         selectedTab = 3; scope.launch { drawerState.close() }
                     }
-                    DrawerItem("Оцените приложение", Icons.Default.ThumbUp, selectedTab == 4) {
+                    DrawerItem(titleRateApp, Icons.Default.ThumbUp, selectedTab == 4) {
                         selectedTab = 4; scope.launch { drawerState.close() }
                     }
-                    DrawerItem("Фильтр", Icons.Default.Tune, selectedTab == 5) {
+                    DrawerItem(titleFilter, Icons.Default.Tune, selectedTab == 5) {
                         selectedTab = 5; scope.launch { drawerState.close() }
                     }
 
                     Spacer(modifier = Modifier.weight(1f))
                     Text(
-                        text = "v1.0.0",
+                        text = versionName,
                         color = Color.Gray,
                         modifier = Modifier.padding(16.dp)
                     )
@@ -105,20 +121,28 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                             horizontalArrangement = Arrangement.Center,
                             modifier = Modifier.fillMaxWidth()
                         ) {
-                            Text("ASTRO", color = Color.White, fontWeight = FontWeight.Bold)
-                            Text("VPN", color = Color(0xFF00FFC8), fontWeight = FontWeight.Bold)
+                            Text(
+                                text = appNameParts.getOrElse(0) { "ASTRO" },
+                                color = Color.White,
+                                fontWeight = FontWeight.Bold
+                            )
+                            Text(
+                                text = appNameParts.getOrElse(1) { "VPN" },
+                                color = Color(0xFF00FFC8),
+                                fontWeight = FontWeight.Bold
+                            )
                             Spacer(Modifier.width(8.dp))
 
                             if (isPremiumUser) {
                                 Icon(
                                     imageVector = Icons.Default.Star,
-                                    contentDescription = "Premium",
+                                    contentDescription = premiumIconDesc,
                                     tint = Color(0xFFFFD700),
                                     modifier = Modifier.size(20.dp)
                                 )
                             } else {
                                 Text(
-                                    text = "FREE",
+                                    text = labelFree,
                                     color = Color.White,
                                     fontWeight = FontWeight.Bold,
                                     fontSize = MaterialTheme.typography.labelSmall.fontSize,
@@ -145,7 +169,7 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                         }
                     },
                     actions = {
-                        Spacer(modifier = Modifier.width(48.dp)) // справа для симметрии
+                        Spacer(modifier = Modifier.width(48.dp))
                     },
                     colors = TopAppBarDefaults.topAppBarColors(
                         containerColor = Color(0xFF0A0F1C),
@@ -172,7 +196,7 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                     0 -> VPNCard(isPremiumUser = isPremiumUser)
                     1 -> AccountScreen()
                     2 -> SettingsScreen()
-                    3 -> SupportScreen()
+                    3 -> SupportScreen(isPremiumUser = isPremiumUser)
                     4 -> RateAppScreen()
                     5 -> FilterScreen()
                 }

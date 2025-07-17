@@ -1,6 +1,8 @@
 package com.example.vpn
 
 import android.app.Activity
+import androidx.compose.ui.res.stringResource
+
 import androidx.compose.ui.platform.LocalContext
 
 import androidx.compose.foundation.Image
@@ -52,7 +54,6 @@ class ConsentActivity : ComponentActivity() {
         }
 
         setContent {
-            // ✅ Принудительно задаём тёмную тему, как в MainActivity
             MaterialTheme(
                 colorScheme = darkColorScheme(
                     background = Color(0xFF0A0F1C),
@@ -71,6 +72,7 @@ class ConsentActivity : ComponentActivity() {
         }
     }
 }
+
 @Composable
 fun ConsentScreen(onAgree: () -> Unit) {
     val context = LocalContext.current
@@ -89,7 +91,6 @@ fun ConsentScreen(onAgree: () -> Unit) {
                 horizontalAlignment = Alignment.CenterHorizontally
             ) {
                 item {
-                    // 🔙 Назад
                     Spacer(modifier = Modifier.height(48.dp))
                     Box(
                         modifier = Modifier
@@ -99,7 +100,7 @@ fun ConsentScreen(onAgree: () -> Unit) {
                     ) {
                         Icon(
                             imageVector = Icons.Default.ArrowBack,
-                            contentDescription = "Назад",
+                            contentDescription = stringResource(R.string.back),
                             tint = Color.White,
                             modifier = Modifier.size(28.dp)
                         )
@@ -107,7 +108,6 @@ fun ConsentScreen(onAgree: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 🔷 Лого
                     Image(
                         painter = painterResource(id = R.drawable.b8fc9d34_55be_4127_be5d_59fbb9d72113__1_),
                         contentDescription = null,
@@ -116,9 +116,8 @@ fun ConsentScreen(onAgree: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 🟢 Заголовок
                     Text(
-                        text = "Добро пожаловать в PulseVPN",
+                        text = stringResource(R.string.welcome),
                         color = Color.White,
                         fontSize = 20.sp,
                         fontWeight = FontWeight.Bold,
@@ -128,14 +127,8 @@ fun ConsentScreen(onAgree: () -> Unit) {
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 📘 Строка 1: Политика (annotated)
                     val policyText = buildAnnotatedString {
-                        append("Прочтите нашу ")
-                        pushStringAnnotation("tag", "policy")
-                        withStyle(SpanStyle(color = Color(0xFF00FFC8))) {
-                            append("Политику конфиденциальности.")
-                        }
-                        pop()
+                        append(stringResource(R.string.read_privacy_policy))
                     }
                     ClickableText(
                         text = policyText,
@@ -145,27 +138,24 @@ fun ConsentScreen(onAgree: () -> Unit) {
                             textAlign = TextAlign.Center
                         ),
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { offset ->
-                            policyText.getStringAnnotations("tag", offset, offset).firstOrNull()?.let {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/privacy-policy"))
-                                )
-                            }
+                        onClick = {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/privacy-policy"))
+                            )
                         }
                     )
 
                     Spacer(modifier = Modifier.height(4.dp))
 
-                    // Строка 2, 3, 4
                     Text(
-                        text = "Нажмите Согласиться и продолжить, чтобы",
+                        text = stringResource(R.string.click_to_agree_1),
                         color = Color(0xFFB0BEC5),
                         fontSize = 15.sp,
                         textAlign = TextAlign.Center,
                         modifier = Modifier.fillMaxWidth()
                     )
                     Text(
-                        text = "принять",
+                        text = stringResource(R.string.click_to_agree_2),
                         color = Color(0xFFB0BEC5),
                         fontSize = 15.sp,
                         textAlign = TextAlign.Center,
@@ -173,11 +163,7 @@ fun ConsentScreen(onAgree: () -> Unit) {
                     )
 
                     val termsText = buildAnnotatedString {
-                        pushStringAnnotation("tag", "terms")
-                        withStyle(SpanStyle(color = Color(0xFF00FFC8))) {
-                            append("Условия использования.")
-                        }
-                        pop()
+                        append(stringResource(R.string.terms_of_use))
                     }
                     ClickableText(
                         text = termsText,
@@ -186,34 +172,31 @@ fun ConsentScreen(onAgree: () -> Unit) {
                             textAlign = TextAlign.Center
                         ),
                         modifier = Modifier.fillMaxWidth(),
-                        onClick = { offset ->
-                            termsText.getStringAnnotations("tag", offset, offset).firstOrNull()?.let {
-                                context.startActivity(
-                                    Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/terms-of-use"))
-                                )
-                            }
+                        onClick = {
+                            context.startActivity(
+                                Intent(Intent.ACTION_VIEW, Uri.parse("https://yourusername.github.io/pulsevpn-policy/terms-of-use"))
+                            )
                         }
                     )
 
                     Spacer(modifier = Modifier.height(24.dp))
 
-                    // 📄 Описание
                     Text(
-                        text = "Принимая Условия использования и используя наш продукт, определённый набор данных устройства пользователей, включая информацию о приложениях, установленных пользователем, автоматически отправляется на серверы PulseVPN.",
+                        text = stringResource(R.string.data_warning_1),
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Мы можем передавать некоторую контактную информацию, такую как список контактов, третьей стороне в маркетинговых и рекламных целях.",
+                        text = stringResource(R.string.data_warning_2),
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
                     )
                     Spacer(modifier = Modifier.height(8.dp))
                     Text(
-                        text = "Все собираемые нами данные анонимны и не содержат никакой личной идентифицирующей информации.",
+                        text = stringResource(R.string.data_warning_3),
                         color = Color(0xFFB0BEC5),
                         fontSize = 12.sp,
                         lineHeight = 18.sp
@@ -221,7 +204,6 @@ fun ConsentScreen(onAgree: () -> Unit) {
                     Spacer(modifier = Modifier.height(32.dp))
                 }
 
-                // 🟦 Кнопка
                 item {
                     Box(
                         modifier = Modifier
@@ -237,7 +219,7 @@ fun ConsentScreen(onAgree: () -> Unit) {
                         contentAlignment = Alignment.Center
                     ) {
                         Text(
-                            text = "Согласиться & Продолжить",
+                            text = stringResource(R.string.agree_continue),
                             color = Color.Black,
                             fontSize = 16.sp,
                             fontWeight = FontWeight.Bold
@@ -247,29 +229,25 @@ fun ConsentScreen(onAgree: () -> Unit) {
                 }
             }
 
-            // 💬 Диалог выхода
             if (showDialog) {
                 AlertDialog(
                     onDismissRequest = { showDialog = false },
                     title = {
-                        Text("Вы уверены, что хотите выйти?", color = Color.White)
+                        Text(stringResource(R.string.exit_confirm_title), color = Color.White)
                     },
                     text = {
-                        Text(
-                            "Согласно политике Google Play, мы не можем предоставить услуги, если вы не согласны. Если вы покинете страницу, приложение будет закрыто.",
-                            color = Color(0xFFB0BEC5)
-                        )
+                        Text(stringResource(R.string.exit_confirm_text), color = Color(0xFFB0BEC5))
                     },
                     confirmButton = {
                         TextButton(onClick = {
                             (context as? Activity)?.finish()
                         }) {
-                            Text("Выйти", color = Color(0xFFFF5252))
+                            Text(stringResource(R.string.exit), color = Color(0xFFFF5252))
                         }
                     },
                     dismissButton = {
                         TextButton(onClick = { showDialog = false }) {
-                            Text("Отмена", color = Color(0xFF00FFC8))
+                            Text(stringResource(R.string.cancel), color = Color(0xFF00FFC8))
                         }
                     },
                     containerColor = Color(0xFF1A1F2E)
