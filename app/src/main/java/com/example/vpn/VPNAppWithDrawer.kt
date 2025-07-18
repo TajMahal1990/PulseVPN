@@ -2,6 +2,7 @@ package com.example.vpn
 
 
 
+import android.util.Log
 import androidx.compose.foundation.Canvas
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
@@ -198,7 +199,10 @@ fun VPNAppWithDrawer(isPremiumUser: Boolean) {
                     2 -> SettingsScreen()
                     3 -> SupportScreen(isPremiumUser = isPremiumUser)
                     4 -> RateAppScreen()
-                    5 -> FilterScreen()
+                    5 -> FilterScreen { packageName, isSelected ->
+                        Log.d("VPNFilter", "$packageName -> $isSelected")
+                        // Можно здесь сохранять в preferences или обновлять состояние VPN
+                    }
                 }
             }
         }
